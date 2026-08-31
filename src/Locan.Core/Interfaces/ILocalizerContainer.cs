@@ -2,11 +2,8 @@
 
 namespace Locan.Core.Interfaces;
 
-public interface ILocalizerContainer
+public interface ILocalizerContainer : IReadOnlyDictionary<string, string>
 {
 	CultureInfo Locale { get; }
-
-	IReadOnlyDictionary<string, string> KeyMessages { get; }
-
 	void Initialize(Dictionary<string, string> keyMessages);
 }
