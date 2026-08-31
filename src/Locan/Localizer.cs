@@ -25,19 +25,14 @@ public class Localizer(
 		[NotNullWhen(true)] out string? value)
 	{
 		var container = containerProvider.Find(locale);
-		if (container == null)
-		{
-			value = null;
-			return false;
-		}
+		if (container != null && container.TryGetValue(message.MessageKey, out var segmentsContainer))
+			return renderer.TryRender(
+				segmentsContainer,
+				message,
+				out value);
 
-		if (!container.TryGetValue(message.MessageKey, out var segmentsContainer))
-		{
-			value = null;
-			return false;
-		}
-
-		return renderer.TryRender(segmentsContainer, message, out value);
+		value = null;
+		return false;
 	}
 
 	public bool IsSupported(CultureInfo locale)
