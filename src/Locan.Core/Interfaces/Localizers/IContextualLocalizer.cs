@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Locan.Core.Interfaces;
+namespace Locan.Core.Interfaces.Localizers;
 
 public interface IContextualLocalizer
 {

@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Locan.Core.Interfaces;
+namespace Locan.Core.Interfaces.Containers;
 
 public interface ILocalizerContainerProvider
 {
