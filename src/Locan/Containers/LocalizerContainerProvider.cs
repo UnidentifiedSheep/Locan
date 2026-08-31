@@ -1,7 +1,7 @@
 using System.Globalization;
 using Locan.Core.Interfaces.Containers;
 
-namespace Locan;
+namespace Locan.Containers;
 
 public sealed class LocalizerContainerProvider : ILocalizerContainerProvider
 {

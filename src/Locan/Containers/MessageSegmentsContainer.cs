@@ -1,10 +1,9 @@
 using System.Collections;
 using Locan.Core.Enums;
-using Locan.Core.Interfaces;
 using Locan.Core.Interfaces.Containers;
 using Locan.Core.Segments;
 
-namespace Locan;
+namespace Locan.Containers;
 
 public sealed class MessageSegmentsContainer : IMessageSegmentsContainer
 {
