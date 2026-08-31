@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locan.Core", "src\Locan.Core\Locan.Core.csproj", "{37154A24-181C-4A36-A877-F70374BC9477}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locan", "src\Locan\Locan.csproj", "{A611C462-4186-4CF9-B431-3720AC470BF9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{37154A24-181C-4A36-A877-F70374BC9477}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37154A24-181C-4A36-A877-F70374BC9477}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37154A24-181C-4A36-A877-F70374BC9477}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A611C462-4186-4CF9-B431-3720AC470BF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A611C462-4186-4CF9-B431-3720AC470BF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A611C462-4186-4CF9-B431-3720AC470BF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A611C462-4186-4CF9-B431-3720AC470BF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
