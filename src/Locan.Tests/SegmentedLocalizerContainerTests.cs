@@ -7,11 +7,9 @@ namespace Locan.Tests;
 public sealed class SegmentedLocalizerContainerTests
 {
 	[Fact]
-	public void Initialize_StoresOnlyRuntimeSegments()
+	public void Constructor_StoresOnlyRuntimeSegments()
 	{
-		var container = CreateContainer();
-
-		container.Initialize(new Dictionary<string, string>
+		var container = CreateContainer(new Dictionary<string, string>
 		{
 			["Value"] = "Date: {Date|DateTime|yyyy-MM-dd}"
 		});
@@ -23,45 +21,67 @@ public sealed class SegmentedLocalizerContainerTests
 	}
 
 	[Fact]
-	public void Initialize_CanOnlyBeCalledOnce()
+	public void Constructor_CreatesReadyEmptyContainer()
 	{
-		var container = CreateContainer();
-		container.Initialize(new Dictionary<string, string>());
+		var container = CreateContainer(new Dictionary<string, string>());
 
-		Assert.Throws<InvalidOperationException>(
-			() => container.Initialize(new Dictionary<string, string>()));
+		Assert.Empty(container);
 	}
 
 	[Fact]
-	public void Initialize_DoesNotPublishPartialState()
+	public void Constructor_DoesNotRetainMutableSource()
 	{
-		var container = CreateContainer();
-
-		Assert.Throws<FormatException>(() => container.Initialize(
-			new Dictionary<string, string>
-			{
-				["Valid"] = "Valid",
-				["Invalid"] = "{Value"
-			}));
-
-		Assert.Throws<InvalidOperationException>(() => _ = container.Count);
-
-		container.Initialize(new Dictionary<string, string>
+		var messages = new Dictionary<string, string>
 		{
-			["Valid"] = "Valid"
-		});
+			["First"] = "First"
+		};
+		var container = CreateContainer(messages);
+
+		messages["Second"] = "Second";
 
 		Assert.Single(container);
+		Assert.False(container.ContainsKey("Second"));
 	}
 
 	[Fact]
-	public void ReadBeforeInitialize_Throws()
+	public void Constructor_RejectsInvalidTemplate()
 	{
-		var container = CreateContainer();
-
-		Assert.Throws<InvalidOperationException>(() => _ = container.Count);
+		Assert.Throws<FormatException>(() => CreateContainer(
+			new Dictionary<string, string>
+			{
+				["Invalid"] = "{Value"
+			}));
 	}
 
-	private static SegmentedLocalizerContainer CreateContainer() =>
-		new(CultureInfo.GetCultureInfo("en"));
+	[Fact]
+	public void Constructor_RejectsEmptyMessageKey()
+	{
+		Assert.Throws<ArgumentException>(() => CreateContainer(
+			new Dictionary<string, string>
+			{
+				[""] = "Value"
+			}));
+	}
+
+	[Fact]
+	public void Constructor_RejectsNullLocale()
+	{
+		Assert.Throws<ArgumentNullException>(() =>
+			new SegmentedLocalizerContainer(
+				null!,
+				new Dictionary<string, string>()));
+	}
+
+	[Fact]
+	public void Constructor_RejectsNullMessages()
+	{
+		Assert.Throws<ArgumentNullException>(() =>
+			new SegmentedLocalizerContainer(
+				CultureInfo.GetCultureInfo("en"),
+				null!));
+	}
+
+	private static SegmentedLocalizerContainer CreateContainer(
+		IReadOnlyDictionary<string, string> messages) =>
+		new(CultureInfo.GetCultureInfo("en"), messages);
 }

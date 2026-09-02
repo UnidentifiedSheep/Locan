@@ -9,32 +9,22 @@ namespace Locan.Containers;
 
 public sealed class SegmentedLocalizerContainer : ILocalizerContainer
 {
-	private FrozenDictionary<string, IMessageSegmentsContainer>? _containers;
-
-	public SegmentedLocalizerContainer(CultureInfo locale)
-	{
-		ArgumentNullException.ThrowIfNull(locale);
-
-		Locale = locale;
-	}
+	private readonly FrozenDictionary<string, IMessageSegmentsContainer> _containers;
 
 	public CultureInfo Locale { get; }
+	public int Count => _containers.Count;
+	public IEnumerable<string> Keys => _containers.Keys;
+	public IEnumerable<IMessageSegmentsContainer> Values => _containers.Values;
+	public IMessageSegmentsContainer this[string key] => _containers[key];
 
-	public int Count => Containers.Count;
-
-	public IEnumerable<string> Keys => Containers.Keys;
-
-	public IEnumerable<IMessageSegmentsContainer> Values => Containers.Values;
-
-	public IMessageSegmentsContainer this[string key] => Containers[key];
-
-	public void Initialize(IReadOnlyDictionary<string, string> keyMessages)
+	public SegmentedLocalizerContainer(
+		CultureInfo locale,
+		IReadOnlyDictionary<string, string> keyMessages)
 	{
+		ArgumentNullException.ThrowIfNull(locale);
 		ArgumentNullException.ThrowIfNull(keyMessages);
 
-		if (Volatile.Read(ref _containers) is not null)
-			throw new InvalidOperationException("Localizer container is already initialized.");
-
+		Locale = locale;
 		var parsed = new Dictionary<string, IMessageSegmentsContainer>(
 			keyMessages.Count,
 			StringComparer.Ordinal);
@@ -55,23 +45,16 @@ public sealed class SegmentedLocalizerContainer : ILocalizerContainer
 			parsed.Add(key, new MessageSegmentsContainer(segments));
 		}
 
-		var containers = parsed.ToFrozenDictionary(StringComparer.Ordinal);
-
-		if (Interlocked.CompareExchange(ref _containers, containers, null) is not null)
-			throw new InvalidOperationException("Localizer container is already initialized.");
+		_containers = parsed.ToFrozenDictionary(StringComparer.Ordinal);
 	}
 
-	public bool ContainsKey(string key) => Containers.ContainsKey(key);
+	public bool ContainsKey(string key) => _containers.ContainsKey(key);
 
 	public bool TryGetValue(string key, out IMessageSegmentsContainer value) =>
-		Containers.TryGetValue(key, out value!);
+		_containers.TryGetValue(key, out value!);
 
 	public IEnumerator<KeyValuePair<string, IMessageSegmentsContainer>> GetEnumerator() =>
-		Containers.GetEnumerator();
+		_containers.GetEnumerator();
 
 	IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-	private FrozenDictionary<string, IMessageSegmentsContainer> Containers =>
-		Volatile.Read(ref _containers)
-		?? throw new InvalidOperationException("Localizer container is not initialized.");
 }

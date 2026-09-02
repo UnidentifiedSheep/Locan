@@ -49,9 +49,7 @@ public sealed class LocalizerContainerProviderTests
 	}
 
 	private static SegmentedLocalizerContainer CreateContainer(string locale)
-	{
-		var container = new SegmentedLocalizerContainer(CultureInfo.GetCultureInfo(locale));
-		container.Initialize(new Dictionary<string, string>());
-		return container;
-	}
+		=> new(
+			CultureInfo.GetCultureInfo(locale),
+			new Dictionary<string, string>());
 }
