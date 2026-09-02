@@ -2,19 +2,21 @@ using Locan.Core.Interfaces;
 
 namespace Locan.LocalizableMessages;
 
-public abstract class LocalizableMessage : ILocalizableMessage
+public class LocalizableMessage : ILocalizableMessage
 {
 	public string MessageKey { get; }
 	protected readonly Dictionary<string, string?> ValuesDict = new();
 	public IReadOnlyDictionary<string, string?> Values => ValuesDict;
 
-	protected LocalizableMessage(string messageKey)
+	public LocalizableMessage(string messageKey)
 	{
+		ArgumentException.ThrowIfNullOrWhiteSpace(messageKey);
 		MessageKey = messageKey;
 	}
 
 	public virtual ILocalizableMessage WithValue(string key, string? value)
 	{
+		ArgumentException.ThrowIfNullOrWhiteSpace(key);
 		ValuesDict[key] = value;
 		return this;
 	}

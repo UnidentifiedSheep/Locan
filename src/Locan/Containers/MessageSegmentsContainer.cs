@@ -25,7 +25,7 @@ public sealed class MessageSegmentsContainer : IMessageSegmentsContainer
 
 		for (var i = 0; i < _segments.Length; i++)
 		{
-			if (_segments[i].Type == MessageSegmentType.Text)
+			if (_segments[i].Kind == MessageSegmentType.Text)
 				textLength += _segments[i].Value.Length;
 		}
 

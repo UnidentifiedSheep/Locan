@@ -48,7 +48,7 @@ public sealed class SegmentedMessageTemplateRenderer : IMessageTemplateRenderer
 		{
 			var segment = segmentsContainer[i];
 
-			if (segment.Type != MessageSegmentType.Placeholder) continue;
+			if (segment.Kind != MessageSegmentType.Placeholder) continue;
 
 			if (!message.Values.TryGetValue(segment.Value, out var value))
 			{
@@ -60,12 +60,10 @@ public sealed class SegmentedMessageTemplateRenderer : IMessageTemplateRenderer
 			valuesLength += value?.Length ?? 0;
 		}
 
-		var renderedLength = segmentsContainer.TextSegmentsTotalLength + valuesLength;
-
 		rendered = string.Create(
-			renderedLength,
-			(segmentsContainer, message.Values),
-			static (destination, state) =>
+			length: segmentsContainer.TextSegmentsTotalLength + valuesLength,
+			state: (segmentsContainer, message.Values),
+			action: static (destination, state) =>
 			{
 				var (segments, values) = state;
 				var offset = 0;
@@ -74,7 +72,7 @@ public sealed class SegmentedMessageTemplateRenderer : IMessageTemplateRenderer
 				{
 					var segment = segments[i];
 
-					offset = segment.Type switch
+					offset = segment.Kind switch
 					{
 						MessageSegmentType.Text => RenderText(
 							destination,
@@ -86,7 +84,7 @@ public sealed class SegmentedMessageTemplateRenderer : IMessageTemplateRenderer
 							offset,
 							values[segment.Value]),
 
-						_ => throw new InvalidOperationException($"Unknown segment type '{segment.Type}'.")
+						_ => throw new InvalidOperationException($"Unknown segment type '{segment.Kind}'.")
 					};
 				}
 			});

@@ -5,5 +5,5 @@ namespace Locan.Core.Interfaces.Containers;
 public interface ILocalizerContainerProvider
 {
 	ILocalizerContainer? Find(CultureInfo culture);
-	ILocalizerContainer? TryGetRequired(CultureInfo culture);
+	ILocalizerContainer GetRequired(CultureInfo culture);
 }

@@ -8,15 +8,32 @@ using Locan.Core.Interfaces.Rendering;
 
 namespace Locan;
 
-public class Localizer(
-	ILocalizerContainerProvider containerProvider,
-	IMessageTemplateRenderer renderer) : ILocalizer
+public class Localizer : ILocalizer
 {
+	private readonly ILocalizerContainerProvider _containerProvider;
+	private readonly IMessageTemplateRenderer _renderer;
+
+	public Localizer(
+		ILocalizerContainerProvider containerProvider,
+		IMessageTemplateRenderer renderer)
+	{
+		ArgumentNullException.ThrowIfNull(containerProvider);
+		ArgumentNullException.ThrowIfNull(renderer);
+
+		_containerProvider = containerProvider;
+		_renderer = renderer;
+	}
+
 	public string Get(ILocalizableMessage message, CultureInfo locale)
 	{
-		var container = containerProvider.Find(locale) ?? throw new LocalizerContainerNotFound(locale);
-		var template = container[message.MessageKey];
-		return renderer.Render(template, message);
+		ArgumentNullException.ThrowIfNull(message);
+		ArgumentNullException.ThrowIfNull(locale);
+
+		var container = _containerProvider.GetRequired(locale);
+
+		return !container.TryGetValue(message.MessageKey, out var template)
+			? throw new MessageTemplateNotFoundException(message.MessageKey)
+			: _renderer.Render(template, message);
 	}
 
 	public bool TryGet(
@@ -24,9 +41,12 @@ public class Localizer(
 		CultureInfo locale,
 		[NotNullWhen(true)] out string? value)
 	{
-		var container = containerProvider.Find(locale);
+		ArgumentNullException.ThrowIfNull(message);
+		ArgumentNullException.ThrowIfNull(locale);
+
+		var container = _containerProvider.Find(locale);
 		if (container != null && container.TryGetValue(message.MessageKey, out var segmentsContainer))
-			return renderer.TryRender(
+			return _renderer.TryRender(
 				segmentsContainer,
 				message,
 				out value);
@@ -36,5 +56,5 @@ public class Localizer(
 	}
 
 	public bool IsSupported(CultureInfo locale)
-		=> containerProvider.TryGetRequired(locale) != null;
+		=> _containerProvider.Find(locale) != null;
 }

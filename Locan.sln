@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locan.Core", "src\Locan.Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locan", "src\Locan\Locan.csproj", "{A611C462-4186-4CF9-B431-3720AC470BF9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locan.Tests", "src\Locan.Tests\Locan.Tests.csproj", "{96FCC25D-1581-4579-8A15-F06C9D1864A5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{A611C462-4186-4CF9-B431-3720AC470BF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A611C462-4186-4CF9-B431-3720AC470BF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A611C462-4186-4CF9-B431-3720AC470BF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96FCC25D-1581-4579-8A15-F06C9D1864A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96FCC25D-1581-4579-8A15-F06C9D1864A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96FCC25D-1581-4579-8A15-F06C9D1864A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96FCC25D-1581-4579-8A15-F06C9D1864A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
