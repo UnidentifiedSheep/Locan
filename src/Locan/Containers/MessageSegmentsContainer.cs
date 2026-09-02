@@ -5,7 +5,7 @@ using Locan.Core.Segments;
 
 namespace Locan.Containers;
 
-public sealed class MessageSegmentsContainer : IMessageSegmentsContainer
+internal sealed class MessageSegmentsContainer : IMessageSegmentsContainer
 {
 	private readonly MessageSegment[] _segments;
 
