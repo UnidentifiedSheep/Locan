@@ -1,4 +1,5 @@
 using Locan.Core.Enums;
+using Locan.Core.Exceptions;
 using Locan.Core.Parsing;
 using Locan.Core.Segments;
 
@@ -101,14 +102,78 @@ public sealed class MessageTemplateParserTests
 	[Fact]
 	public void Parse_PreservesUnicodeValues()
 	{
-		var segments = MessageTemplateParser.Parse("Привет, {Имя|Строка}! 👋");
+		var segments = MessageTemplateParser.Parse("Привет, {Name|String}! 👋");
 
 		Assert.Collection(
 			segments,
 			segment => AssertSegment<TextMessageSegment>(segment, "Привет, "),
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Имя"),
-			segment => AssertSegment<TypeMessageSegment>(segment, "Строка"),
+			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Name"),
+			segment => AssertSegment<TypeMessageSegment>(segment, "String"),
 			segment => AssertSegment<TextMessageSegment>(segment, "! 👋"));
+	}
+
+	[Fact]
+	public void Parse_AllowsSpacesInsideFormat()
+	{
+		var segments = MessageTemplateParser.Parse("{Date|DateTime|yyyy MM dd}");
+
+		Assert.Collection(
+			segments,
+			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Date"),
+			segment => AssertSegment<TypeMessageSegment>(segment, "DateTime"),
+			segment => AssertSegment<FormatMessageSegment>(segment, "yyyy MM dd"));
+	}
+
+	[Fact]
+	public void Parse_AllowsCustomIdentifierType()
+	{
+		var segments = MessageTemplateParser.Parse("{Value|CustomType}");
+
+		Assert.Collection(
+			segments,
+			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Value"),
+			segment => AssertSegment<TypeMessageSegment>(segment, "CustomType"));
+	}
+
+	[Fact]
+	public void Parse_UnescapesBracesInText()
+	{
+		var segments = MessageTemplateParser.Parse("Object: {{ Name: {Name} }}");
+
+		Assert.Collection(
+			segments,
+			segment => AssertSegment<TextMessageSegment>(segment, "Object: { Name: "),
+			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Name"),
+			segment => AssertSegment<TextMessageSegment>(segment, " }"));
+	}
+
+	[Fact]
+	public void Parse_EscapedPlaceholderSyntaxRemainsText()
+	{
+		var segments = MessageTemplateParser.Parse("{{Value}}");
+
+		Assert.Collection(
+			segments,
+			segment => AssertSegment<TextMessageSegment>(segment, "{Value}"));
+	}
+
+	[Fact]
+	public void Parse_AllowsRepeatedPlaceholderWithSameMetadata()
+	{
+		var segments = MessageTemplateParser.Parse(
+			"{Price|Decimal|F2} and {Price|Decimal|F2}");
+
+		Assert.Equal(7, segments.Count);
+		Assert.Equal("Price", segments[0].Value);
+		Assert.Equal("Price", segments[4].Value);
+	}
+
+	[Fact]
+	public void Parse_TreatsPlaceholderKeysAsCaseSensitive()
+	{
+		var segments = MessageTemplateParser.Parse("{Value|String}{value|Decimal}");
+
+		Assert.Equal(4, segments.Count);
 	}
 
 	[Fact]
@@ -181,9 +246,34 @@ public sealed class MessageTemplateParserTests
 	[Fact]
 	public void Parse_ValidatesFilteredOutSegments()
 	{
-		Assert.Throws<FormatException>(() => MessageTemplateParser.Parse(
+		Assert.Throws<MessageTemplateParseException>(() => MessageTemplateParser.Parse(
 			"text {Value||F2}",
 			MessageSegmentType.Text));
+	}
+
+	[Fact]
+	public void Parse_RejectsConflictingPlaceholderType()
+	{
+		Assert.Throws<MessageTemplateParseException>(() => MessageTemplateParser.Parse(
+			"{Value|String} {Value|Decimal}"));
+	}
+
+	[Fact]
+	public void Parse_RejectsConflictingPlaceholderFormat()
+	{
+		Assert.Throws<MessageTemplateParseException>(() => MessageTemplateParser.Parse(
+			"{Value|Decimal|F2} {Value|Decimal|F4}"));
+	}
+
+	[Fact]
+	public void Parse_ErrorContainsPositionAndReason()
+	{
+		var exception = Assert.Throws<MessageTemplateParseException>(
+			() => MessageTemplateParser.Parse("abc }"));
+
+		Assert.Equal(4, exception.Position);
+		Assert.Equal("Unexpected closing brace", exception.Reason);
+		Assert.Equal("Unexpected closing brace at position 4.", exception.Message);
 	}
 
 	[Fact]
@@ -210,9 +300,23 @@ public sealed class MessageTemplateParserTests
 	[InlineData("{Value|Decimal|}")]
 	[InlineData("{Value|Decimal| }")]
 	[InlineData("{Value|Decimal|F2|extra}")]
-	[InlineData("{{Value}}")]
+	[InlineData("{ Value}")]
+	[InlineData("{Value }")]
+	[InlineData("{Value |String}")]
+	[InlineData("{Value| String}")]
+	[InlineData("{Value|String }")]
+	[InlineData("{Value|String| F2}")]
+	[InlineData("{Value|String|F2 }")]
+	[InlineData("{Value|String|F\t2}")]
+	[InlineData("{Value|String|F\n2}")]
+	[InlineData("{User-Name}")]
+	[InlineData("{User.Name}")]
+	[InlineData("{1Value}")]
+	[InlineData("{Имя}")]
+	[InlineData("{Value|System.DateTime}")]
+	[InlineData("text }")]
 	public void Parse_RejectsInvalidTemplate(string template)
-		=> Assert.Throws<FormatException>(() => MessageTemplateParser.Parse(template));
+		=> Assert.Throws<MessageTemplateParseException>(() => MessageTemplateParser.Parse(template));
 
 	private static void AssertSegment<TSegment>(MessageSegment segment, string value)
 		where TSegment : MessageSegment

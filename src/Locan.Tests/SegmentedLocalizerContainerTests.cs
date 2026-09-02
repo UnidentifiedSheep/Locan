@@ -1,5 +1,6 @@
 using System.Globalization;
 using Locan.Containers;
+using Locan.Core.Exceptions;
 using Locan.Core.Segments;
 
 namespace Locan.Tests;
@@ -46,7 +47,7 @@ public sealed class SegmentedLocalizerContainerTests
 	[Fact]
 	public void Constructor_RejectsInvalidTemplate()
 	{
-		Assert.Throws<FormatException>(() => CreateContainer(
+		Assert.Throws<MessageTemplateParseException>(() => CreateContainer(
 			new Dictionary<string, string>
 			{
 				["Invalid"] = "{Value"
