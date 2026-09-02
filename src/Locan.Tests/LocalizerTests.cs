@@ -48,10 +48,15 @@ public sealed class LocalizerTests
 	}
 
 	private static global::Locan.Localizer CreateLocalizer(
-		SegmentedLocalizerContainer container) =>
-		new(
-			new LocalizerContainerProvider([container]),
+		SegmentedLocalizerContainer container)
+	{
+		var provider = new LocalizerContainerProvider();
+		provider.SetContainers([container]);
+
+		return new global::Locan.Localizer(
+			provider,
 			new SegmentedMessageTemplateRenderer());
+	}
 
 	private static SegmentedLocalizerContainer CreateContainer(
 		string locale,

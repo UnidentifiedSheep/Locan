@@ -1,40 +1,47 @@
+using System.Collections.Frozen;
 using System.Globalization;
 using Locan.Core.Exceptions;
 using Locan.Core.Interfaces.Containers;
 
 namespace Locan.Containers;
 
-public sealed class LocalizerContainerProvider : ILocalizerContainerProvider
+public sealed class LocalizerContainerProvider :
+	ILocalizerContainerProvider,
+	ILocalizerContainerRegistry
 {
-	private readonly Dictionary<string, ILocalizerContainer> _containers;
+	private FrozenDictionary<string, ILocalizerContainer> _containers =
+		FrozenDictionary<string, ILocalizerContainer>.Empty;
 
-	public LocalizerContainerProvider(
-		IEnumerable<ILocalizerContainer> containers)
+	public void SetContainers(IEnumerable<ILocalizerContainer> containers)
 	{
 		ArgumentNullException.ThrowIfNull(containers);
 
-		_containers = new Dictionary<string, ILocalizerContainer>(StringComparer.OrdinalIgnoreCase);
+		var next = new Dictionary<string, ILocalizerContainer>(StringComparer.OrdinalIgnoreCase);
 
 		foreach (var container in containers)
 		{
 			ArgumentNullException.ThrowIfNull(container);
 
-			if (!_containers.TryAdd(container.Locale.Name, container))
+			if (!next.TryAdd(container.Locale.Name, container))
 				throw new ArgumentException(
 					$"A localizer container for '{container.Locale.Name}' is already registered.",
 					nameof(containers));
 		}
+
+		var snapshot = next.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+		Volatile.Write(ref _containers, snapshot);
 	}
 
 	public ILocalizerContainer? Find(CultureInfo culture)
 	{
 		ArgumentNullException.ThrowIfNull(culture);
 
+		var containers = Volatile.Read(ref _containers);
 		var current = culture;
 
 		while (!string.IsNullOrEmpty(current.Name))
 		{
-			if (_containers.TryGetValue(current.Name, out var container))
+			if (containers.TryGetValue(current.Name, out var container))
 				return container;
 
 			current = current.Parent;
