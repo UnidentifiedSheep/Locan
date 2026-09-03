@@ -4,5 +4,5 @@ namespace Locan.Core.Interfaces.Containers;
 
 public interface ILocalizerContainer : IReadOnlyDictionary<string, IMessageSegmentsContainer>
 {
-	CultureInfo Locale { get; }
+	CultureInfo Culture { get; }
 }

@@ -11,20 +11,20 @@ public sealed class SegmentedLocalizerContainer : ILocalizerContainer
 {
 	private readonly FrozenDictionary<string, IMessageSegmentsContainer> _containers;
 
-	public CultureInfo Locale { get; }
+	public CultureInfo Culture { get; }
 	public int Count => _containers.Count;
 	public IEnumerable<string> Keys => _containers.Keys;
 	public IEnumerable<IMessageSegmentsContainer> Values => _containers.Values;
 	public IMessageSegmentsContainer this[string key] => _containers[key];
 
 	public SegmentedLocalizerContainer(
-		CultureInfo locale,
+		CultureInfo culture,
 		IReadOnlyDictionary<string, string> keyMessages)
 	{
-		ArgumentNullException.ThrowIfNull(locale);
+		ArgumentNullException.ThrowIfNull(culture);
 		ArgumentNullException.ThrowIfNull(keyMessages);
 
-		Locale = locale;
+		Culture = culture;
 		var parsed = new Dictionary<string, IMessageSegmentsContainer>(
 			keyMessages.Count,
 			StringComparer.Ordinal);

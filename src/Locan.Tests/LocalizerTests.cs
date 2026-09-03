@@ -2,7 +2,7 @@ using System.Globalization;
 using Locan.Containers;
 using Locan.Core.Exceptions;
 using Locan.LocalizableMessages;
-using Locan.TemplateRenderers;
+using Locan.Tests.TestInfrastructure;
 
 namespace Locan.Tests;
 
@@ -12,7 +12,7 @@ public sealed class LocalizerTests
 	public void Get_UsesParentCultureFallback()
 	{
 		var container = CreateContainer("en", "Hello {Name|String}");
-		var localizer = CreateLocalizer(container);
+		var localizer = TestFactory.CreateLocalizer(container);
 		var message = new LocalizableMessage("Greeting").WithValue("Name", "Alex");
 
 		var result = localizer.Get(message, CultureInfo.GetCultureInfo("en-US"));
@@ -24,7 +24,7 @@ public sealed class LocalizerTests
 	public void Get_ThrowsSpecificExceptionForMissingTemplate()
 	{
 		var container = CreateContainer("en", "Hello");
-		var localizer = CreateLocalizer(container);
+		var localizer = TestFactory.CreateLocalizer(container);
 		var message = new LocalizableMessage("Missing");
 
 		Assert.Throws<MessageTemplateNotFoundException>(
@@ -35,7 +35,7 @@ public sealed class LocalizerTests
 	public void TryGet_ReturnsFalseForMissingPlaceholderValue()
 	{
 		var container = CreateContainer("en", "Hello {Name|String}");
-		var localizer = CreateLocalizer(container);
+		var localizer = TestFactory.CreateLocalizer(container);
 		var message = new LocalizableMessage("Greeting");
 
 		var result = localizer.TryGet(
@@ -47,22 +47,10 @@ public sealed class LocalizerTests
 		Assert.Null(value);
 	}
 
-	private static global::Locan.Localizer CreateLocalizer(
-		SegmentedLocalizerContainer container)
-	{
-		var provider = new LocalizerContainerProvider();
-		provider.SetContainers([container]);
-
-		return new global::Locan.Localizer(
-			provider,
-			new SegmentedMessageTemplateRenderer());
-	}
-
 	private static SegmentedLocalizerContainer CreateContainer(
-		string locale,
-		string template) =>
-		new(
-			CultureInfo.GetCultureInfo(locale),
+		string culture,
+		string template) => TestFactory.CreateContainer(
+			culture,
 			new Dictionary<string, string>
 			{
 				["Greeting"] = template

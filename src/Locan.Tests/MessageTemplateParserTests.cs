@@ -20,9 +20,7 @@ public sealed class MessageTemplateParserTests
 	{
 		var segments = MessageTemplateParser.Parse("plain text");
 
-		Assert.Collection(
-			segments,
-			segment => AssertSegment<TextMessageSegment>(segment, "plain text"));
+		AssertSegments(segments, MessageSegment.Text("plain text"));
 	}
 
 	[Fact]
@@ -30,9 +28,7 @@ public sealed class MessageTemplateParserTests
 	{
 		var segments = MessageTemplateParser.Parse("{Name}");
 
-		Assert.Collection(
-			segments,
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Name"));
+		AssertSegments(segments, MessageSegment.Placeholder("Name"));
 	}
 
 	[Fact]
@@ -40,10 +36,10 @@ public sealed class MessageTemplateParserTests
 	{
 		var segments = MessageTemplateParser.Parse("{Value|String}");
 
-		Assert.Collection(
+		AssertSegments(
 			segments,
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Value"),
-			segment => AssertSegment<TypeMessageSegment>(segment, "String"));
+			MessageSegment.Placeholder("Value"),
+			MessageSegment.Type("String"));
 	}
 
 	[Fact]
@@ -51,11 +47,11 @@ public sealed class MessageTemplateParserTests
 	{
 		var segments = MessageTemplateParser.Parse("{Price|Decimal|F2}");
 
-		Assert.Collection(
+		AssertSegments(
 			segments,
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Price"),
-			segment => AssertSegment<TypeMessageSegment>(segment, "Decimal"),
-			segment => AssertSegment<FormatMessageSegment>(segment, "F2"));
+			MessageSegment.Placeholder("Price"),
+			MessageSegment.Type("Decimal"),
+			MessageSegment.Format("F2"));
 	}
 
 	[Fact]
@@ -64,16 +60,16 @@ public sealed class MessageTemplateParserTests
 		var segments = MessageTemplateParser.Parse(
 			"some values {Date|DateTime|yyyy-MM-dd} other {Price|Decimal|F2}");
 
-		Assert.Collection(
+		AssertSegments(
 			segments,
-			segment => AssertSegment<TextMessageSegment>(segment, "some values "),
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Date"),
-			segment => AssertSegment<TypeMessageSegment>(segment, "DateTime"),
-			segment => AssertSegment<FormatMessageSegment>(segment, "yyyy-MM-dd"),
-			segment => AssertSegment<TextMessageSegment>(segment, " other "),
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Price"),
-			segment => AssertSegment<TypeMessageSegment>(segment, "Decimal"),
-			segment => AssertSegment<FormatMessageSegment>(segment, "F2"));
+			MessageSegment.Text("some values "),
+			MessageSegment.Placeholder("Date"),
+			MessageSegment.Type("DateTime"),
+			MessageSegment.Format("yyyy-MM-dd"),
+			MessageSegment.Text(" other "),
+			MessageSegment.Placeholder("Price"),
+			MessageSegment.Type("Decimal"),
+			MessageSegment.Format("F2"));
 	}
 
 	[Fact]
@@ -81,10 +77,10 @@ public sealed class MessageTemplateParserTests
 	{
 		var segments = MessageTemplateParser.Parse("{First}{Second}");
 
-		Assert.Collection(
+		AssertSegments(
 			segments,
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "First"),
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Second"));
+			MessageSegment.Placeholder("First"),
+			MessageSegment.Placeholder("Second"));
 	}
 
 	[Fact]
@@ -92,11 +88,11 @@ public sealed class MessageTemplateParserTests
 	{
 		var segments = MessageTemplateParser.Parse("{First} middle {Second}");
 
-		Assert.Collection(
+		AssertSegments(
 			segments,
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "First"),
-			segment => AssertSegment<TextMessageSegment>(segment, " middle "),
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Second"));
+			MessageSegment.Placeholder("First"),
+			MessageSegment.Text(" middle "),
+			MessageSegment.Placeholder("Second"));
 	}
 
 	[Fact]
@@ -104,12 +100,12 @@ public sealed class MessageTemplateParserTests
 	{
 		var segments = MessageTemplateParser.Parse("Привет, {Name|String}! 👋");
 
-		Assert.Collection(
+		AssertSegments(
 			segments,
-			segment => AssertSegment<TextMessageSegment>(segment, "Привет, "),
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Name"),
-			segment => AssertSegment<TypeMessageSegment>(segment, "String"),
-			segment => AssertSegment<TextMessageSegment>(segment, "! 👋"));
+			MessageSegment.Text("Привет, "),
+			MessageSegment.Placeholder("Name"),
+			MessageSegment.Type("String"),
+			MessageSegment.Text("! 👋"));
 	}
 
 	[Fact]
@@ -117,11 +113,11 @@ public sealed class MessageTemplateParserTests
 	{
 		var segments = MessageTemplateParser.Parse("{Date|DateTime|yyyy MM dd}");
 
-		Assert.Collection(
+		AssertSegments(
 			segments,
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Date"),
-			segment => AssertSegment<TypeMessageSegment>(segment, "DateTime"),
-			segment => AssertSegment<FormatMessageSegment>(segment, "yyyy MM dd"));
+			MessageSegment.Placeholder("Date"),
+			MessageSegment.Type("DateTime"),
+			MessageSegment.Format("yyyy MM dd"));
 	}
 
 	[Fact]
@@ -129,10 +125,10 @@ public sealed class MessageTemplateParserTests
 	{
 		var segments = MessageTemplateParser.Parse("{Value|CustomType}");
 
-		Assert.Collection(
+		AssertSegments(
 			segments,
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Value"),
-			segment => AssertSegment<TypeMessageSegment>(segment, "CustomType"));
+			MessageSegment.Placeholder("Value"),
+			MessageSegment.Type("CustomType"));
 	}
 
 	[Fact]
@@ -140,11 +136,11 @@ public sealed class MessageTemplateParserTests
 	{
 		var segments = MessageTemplateParser.Parse("Object: {{ Name: {Name} }}");
 
-		Assert.Collection(
+		AssertSegments(
 			segments,
-			segment => AssertSegment<TextMessageSegment>(segment, "Object: { Name: "),
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Name"),
-			segment => AssertSegment<TextMessageSegment>(segment, " }"));
+			MessageSegment.Text("Object: { Name: "),
+			MessageSegment.Placeholder("Name"),
+			MessageSegment.Text(" }"));
 	}
 
 	[Fact]
@@ -152,9 +148,7 @@ public sealed class MessageTemplateParserTests
 	{
 		var segments = MessageTemplateParser.Parse("{{Value}}");
 
-		Assert.Collection(
-			segments,
-			segment => AssertSegment<TextMessageSegment>(segment, "{Value}"));
+		AssertSegments(segments, MessageSegment.Text("{Value}"));
 	}
 
 	[Fact]
@@ -184,10 +178,10 @@ public sealed class MessageTemplateParserTests
 			MessageSegmentType.Text,
 			MessageSegmentType.Placeholder);
 
-		Assert.Collection(
+		AssertSegments(
 			segments,
-			segment => AssertSegment<TextMessageSegment>(segment, "Value: "),
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Price"));
+			MessageSegment.Text("Value: "),
+			MessageSegment.Placeholder("Price"));
 	}
 
 	[Fact]
@@ -197,10 +191,10 @@ public sealed class MessageTemplateParserTests
 			"before{Value|Decimal|F2}after",
 			MessageSegmentType.Text);
 
-		Assert.Collection(
+		AssertSegments(
 			segments,
-			segment => AssertSegment<TextMessageSegment>(segment, "before"),
-			segment => AssertSegment<TextMessageSegment>(segment, "after"));
+			MessageSegment.Text("before"),
+			MessageSegment.Text("after"));
 	}
 
 	[Theory]
@@ -238,9 +232,7 @@ public sealed class MessageTemplateParserTests
 			MessageSegmentType.Placeholder,
 			MessageSegmentType.Placeholder);
 
-		Assert.Collection(
-			segments,
-			segment => AssertSegment<PlaceholderMessageSegment>(segment, "Value"));
+		AssertSegments(segments, MessageSegment.Placeholder("Value"));
 	}
 
 	[Fact]
@@ -318,10 +310,8 @@ public sealed class MessageTemplateParserTests
 	public void Parse_RejectsInvalidTemplate(string template)
 		=> Assert.Throws<MessageTemplateParseException>(() => MessageTemplateParser.Parse(template));
 
-	private static void AssertSegment<TSegment>(MessageSegment segment, string value)
-		where TSegment : MessageSegment
-	{
-		var typed = Assert.IsType<TSegment>(segment);
-		Assert.Equal(value, typed.Value);
-	}
+	private static void AssertSegments(
+		IReadOnlyList<MessageSegment> actual,
+		params MessageSegment[] expected) =>
+		Assert.Equal(expected, actual);
 }

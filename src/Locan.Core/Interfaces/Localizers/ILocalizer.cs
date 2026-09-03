@@ -7,13 +7,13 @@ public interface ILocalizer
 {
 	string Get(
 		ILocalizableMessage message,
-		CultureInfo locale);
+		CultureInfo culture);
 
 	bool TryGet(
 		ILocalizableMessage message,
-		CultureInfo locale,
+		CultureInfo culture,
 		[NotNullWhen(true)]
 		out string? value);
 
-	bool IsSupported(CultureInfo locale);
+	bool IsSupported(CultureInfo culture);
 }

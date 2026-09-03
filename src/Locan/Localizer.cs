@@ -24,12 +24,12 @@ public class Localizer : ILocalizer
 		_renderer = renderer;
 	}
 
-	public string Get(ILocalizableMessage message, CultureInfo locale)
+	public string Get(ILocalizableMessage message, CultureInfo culture)
 	{
 		ArgumentNullException.ThrowIfNull(message);
-		ArgumentNullException.ThrowIfNull(locale);
+		ArgumentNullException.ThrowIfNull(culture);
 
-		var container = _containerProvider.GetRequired(locale);
+		var container = _containerProvider.GetRequired(culture);
 
 		return !container.TryGetValue(message.MessageKey, out var template)
 			? throw new MessageTemplateNotFoundException(message.MessageKey)
@@ -38,13 +38,13 @@ public class Localizer : ILocalizer
 
 	public bool TryGet(
 		ILocalizableMessage message,
-		CultureInfo locale,
+		CultureInfo culture,
 		[NotNullWhen(true)] out string? value)
 	{
 		ArgumentNullException.ThrowIfNull(message);
-		ArgumentNullException.ThrowIfNull(locale);
+		ArgumentNullException.ThrowIfNull(culture);
 
-		var container = _containerProvider.Find(locale);
+		var container = _containerProvider.Find(culture);
 		if (container != null && container.TryGetValue(message.MessageKey, out var segmentsContainer))
 			return _renderer.TryRender(
 				segmentsContainer,
@@ -55,6 +55,6 @@ public class Localizer : ILocalizer
 		return false;
 	}
 
-	public bool IsSupported(CultureInfo locale)
-		=> _containerProvider.Find(locale) != null;
+	public bool IsSupported(CultureInfo culture)
+		=> _containerProvider.Find(culture) != null;
 }

@@ -22,9 +22,9 @@ public sealed class LocalizerContainerProvider :
 		{
 			ArgumentNullException.ThrowIfNull(container);
 
-			if (!next.TryAdd(container.Locale.Name, container))
+			if (!next.TryAdd(container.Culture.Name, container))
 				throw new ArgumentException(
-					$"A localizer container for '{container.Locale.Name}' is already registered.",
+					$"A localizer container for '{container.Culture.Name}' is already registered.",
 					nameof(containers));
 		}
 

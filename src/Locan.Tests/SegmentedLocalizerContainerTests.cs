@@ -2,6 +2,7 @@ using System.Globalization;
 using Locan.Containers;
 using Locan.Core.Exceptions;
 using Locan.Core.Segments;
+using Locan.Tests.TestInfrastructure;
 
 namespace Locan.Tests;
 
@@ -10,7 +11,7 @@ public sealed class SegmentedLocalizerContainerTests
 	[Fact]
 	public void Constructor_StoresOnlyRuntimeSegments()
 	{
-		var container = CreateContainer(new Dictionary<string, string>
+		var container = TestFactory.CreateContainer(messages: new Dictionary<string, string>
 		{
 			["Value"] = "Date: {Date|DateTime|yyyy-MM-dd}"
 		});
@@ -24,7 +25,7 @@ public sealed class SegmentedLocalizerContainerTests
 	[Fact]
 	public void Constructor_CreatesReadyEmptyContainer()
 	{
-		var container = CreateContainer(new Dictionary<string, string>());
+		var container = TestFactory.CreateContainer();
 
 		Assert.Empty(container);
 	}
@@ -36,7 +37,7 @@ public sealed class SegmentedLocalizerContainerTests
 		{
 			["First"] = "First"
 		};
-		var container = CreateContainer(messages);
+		var container = TestFactory.CreateContainer(messages: messages);
 
 		messages["Second"] = "Second";
 
@@ -47,8 +48,8 @@ public sealed class SegmentedLocalizerContainerTests
 	[Fact]
 	public void Constructor_RejectsInvalidTemplate()
 	{
-		Assert.Throws<MessageTemplateParseException>(() => CreateContainer(
-			new Dictionary<string, string>
+		Assert.Throws<MessageTemplateParseException>(() => TestFactory.CreateContainer(
+			messages: new Dictionary<string, string>
 			{
 				["Invalid"] = "{Value"
 			}));
@@ -57,15 +58,15 @@ public sealed class SegmentedLocalizerContainerTests
 	[Fact]
 	public void Constructor_RejectsEmptyMessageKey()
 	{
-		Assert.Throws<ArgumentException>(() => CreateContainer(
-			new Dictionary<string, string>
+		Assert.Throws<ArgumentException>(() => TestFactory.CreateContainer(
+			messages: new Dictionary<string, string>
 			{
 				[""] = "Value"
 			}));
 	}
 
 	[Fact]
-	public void Constructor_RejectsNullLocale()
+	public void Constructor_RejectsNullCulture()
 	{
 		Assert.Throws<ArgumentNullException>(() =>
 			new SegmentedLocalizerContainer(
@@ -81,8 +82,4 @@ public sealed class SegmentedLocalizerContainerTests
 				CultureInfo.GetCultureInfo("en"),
 				null!));
 	}
-
-	private static SegmentedLocalizerContainer CreateContainer(
-		IReadOnlyDictionary<string, string> messages) =>
-		new(CultureInfo.GetCultureInfo("en"), messages);
 }

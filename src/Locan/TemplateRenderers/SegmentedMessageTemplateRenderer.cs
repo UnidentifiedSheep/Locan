@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Locan.Core.Enums;
+using Locan.Core.Exceptions;
 using Locan.Core.Interfaces;
 using Locan.Core.Interfaces.Containers;
 using Locan.Core.Interfaces.Rendering;
@@ -28,7 +29,7 @@ public sealed class SegmentedMessageTemplateRenderer : IMessageTemplateRenderer
 			out var rendered,
 			out var missingKey)
 			? rendered
-			: throw new KeyNotFoundException($"Value for placeholder '{missingKey}' was not found.");
+			: throw new PlaceholderValueNotFoundException(missingKey!);
 	}
 
 	private static bool RenderCore(

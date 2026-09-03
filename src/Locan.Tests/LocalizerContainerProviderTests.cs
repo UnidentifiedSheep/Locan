@@ -1,6 +1,7 @@
 using System.Globalization;
 using Locan.Containers;
 using Locan.Core.Exceptions;
+using Locan.Tests.TestInfrastructure;
 
 namespace Locan.Tests;
 
@@ -19,8 +20,8 @@ public sealed class LocalizerContainerProviderTests
 	[Fact]
 	public void Find_ReturnsExactContainer()
 	{
-		var expected = CreateContainer("en-US");
-		var provider = CreateProvider(expected);
+		var expected = TestFactory.CreateContainer("en-US");
+		var provider = TestFactory.CreateProvider(expected);
 
 		var actual = provider.Find(CultureInfo.GetCultureInfo("en-US"));
 
@@ -30,9 +31,9 @@ public sealed class LocalizerContainerProviderTests
 	[Fact]
 	public void Find_PrefersExactContainerOverParent()
 	{
-		var parent = CreateContainer("en");
-		var exact = CreateContainer("en-US");
-		var provider = CreateProvider(parent, exact);
+		var parent = TestFactory.CreateContainer();
+		var exact = TestFactory.CreateContainer("en-US");
+		var provider = TestFactory.CreateProvider(parent, exact);
 
 		var actual = provider.Find(CultureInfo.GetCultureInfo("en-US"));
 
@@ -42,8 +43,8 @@ public sealed class LocalizerContainerProviderTests
 	[Fact]
 	public void Find_FallsBackToParentCulture()
 	{
-		var expected = CreateContainer("en");
-		var provider = CreateProvider(expected);
+		var expected = TestFactory.CreateContainer();
+		var provider = TestFactory.CreateProvider(expected);
 
 		var actual = provider.Find(CultureInfo.GetCultureInfo("en-US"));
 
@@ -63,9 +64,9 @@ public sealed class LocalizerContainerProviderTests
 	[Fact]
 	public void SetContainers_ReplacesPreviousSnapshot()
 	{
-		var english = CreateContainer("en");
-		var german = CreateContainer("de");
-		var provider = CreateProvider(english);
+		var english = TestFactory.CreateContainer();
+		var german = TestFactory.CreateContainer("de");
+		var provider = TestFactory.CreateProvider(english);
 
 		provider.SetContainers([german]);
 
@@ -76,8 +77,8 @@ public sealed class LocalizerContainerProviderTests
 	[Fact]
 	public void SetContainers_DoesNotRetainMutableSource()
 	{
-		var english = CreateContainer("en");
-		var german = CreateContainer("de");
+		var english = TestFactory.CreateContainer();
+		var german = TestFactory.CreateContainer("de");
 		var source = new List<SegmentedLocalizerContainer> { english };
 		var provider = new LocalizerContainerProvider();
 		provider.SetContainers(source);
@@ -91,10 +92,10 @@ public sealed class LocalizerContainerProviderTests
 	[Fact]
 	public void SetContainers_FailedPublicationPreservesPreviousSnapshot()
 	{
-		var english = CreateContainer("en");
-		var firstGerman = CreateContainer("de");
-		var secondGerman = CreateContainer("de");
-		var provider = CreateProvider(english);
+		var english = TestFactory.CreateContainer();
+		var firstGerman = TestFactory.CreateContainer("de");
+		var secondGerman = TestFactory.CreateContainer("de");
+		var provider = TestFactory.CreateProvider(english);
 
 		Assert.Throws<ArgumentException>(
 			() => provider.SetContainers([firstGerman, secondGerman]));
@@ -114,26 +115,14 @@ public sealed class LocalizerContainerProviderTests
 	[Fact]
 	public void SetContainers_RejectsNullContainerAndPreservesPreviousSnapshot()
 	{
-		var english = CreateContainer("en");
-		var provider = CreateProvider(english);
+		var english = TestFactory.CreateContainer();
+		var provider = TestFactory.CreateProvider(english);
 
 		Assert.Throws<ArgumentNullException>(
-			() => provider.SetContainers([CreateContainer("de"), null!]));
+			() => provider.SetContainers([TestFactory.CreateContainer("de"), null!]));
 
 		Assert.Same(english, provider.Find(CultureInfo.GetCultureInfo("en")));
 		Assert.Null(provider.Find(CultureInfo.GetCultureInfo("de")));
 	}
 
-	private static LocalizerContainerProvider CreateProvider(
-		params SegmentedLocalizerContainer[] containers)
-	{
-		var provider = new LocalizerContainerProvider();
-		provider.SetContainers(containers);
-		return provider;
-	}
-
-	private static SegmentedLocalizerContainer CreateContainer(string locale)
-		=> new(
-			CultureInfo.GetCultureInfo(locale),
-			new Dictionary<string, string>());
 }
