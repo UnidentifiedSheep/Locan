@@ -1,6 +1,7 @@
 using System.Globalization;
 using Locan.Containers;
 using Locan.Core.Exceptions;
+using Locan.Core.Interfaces.Containers;
 using Locan.Initialization;
 using Locan.Tests.TestInfrastructure;
 
@@ -79,7 +80,7 @@ public sealed class DirectoryLocalizerInitializerTests
 		await directory.WriteFileAsync(
 			"second.ru.json",
 			CreateFile("ru", "shared.key", "Second"));
-		var previous = TestFactory.CreateContainer("en");
+		var previous = TestFactory.CreateContainer();
 		var (initializer, provider) = CreateInitializer(previous);
 
 		await Assert.ThrowsAsync<ArgumentException>(
@@ -94,7 +95,7 @@ public sealed class DirectoryLocalizerInitializerTests
 	{
 		using var directory = new TemporaryDirectory();
 		await directory.WriteFileAsync("invalid.json", "{ invalid");
-		var previous = TestFactory.CreateContainer("en");
+		var previous = TestFactory.CreateContainer();
 		var (initializer, provider) = CreateInitializer(previous);
 
 		await Assert.ThrowsAsync<InvalidDataException>(
@@ -150,7 +151,7 @@ public sealed class DirectoryLocalizerInitializerTests
 	{
 		using var directory = new TemporaryDirectory();
 		await directory.WriteFileAsync("ignored.txt", "text");
-		var previous = TestFactory.CreateContainer("en");
+		var previous = TestFactory.CreateContainer();
 		var (initializer, provider) = CreateInitializer(previous);
 
 		await initializer.InitializeAsync(directory.Path);
@@ -173,10 +174,44 @@ public sealed class DirectoryLocalizerInitializerTests
 	}
 
 	[Fact]
+	public async Task InitializeAsync_UsesSearchPattern()
+	{
+		using var directory = new TemporaryDirectory();
+		await directory.WriteFileAsync(
+			"article.en.locan.json",
+			CreateFile("en", "article.not.found", "Article not found."));
+		await directory.WriteFileAsync("ignored.json", "{ invalid");
+		var (initializer, provider) = CreateInitializer();
+
+		await initializer.InitializeAsync(directory.Path, "*.locan.json");
+
+		Assert.NotNull(provider.Find(CultureInfo.GetCultureInfo("en")));
+	}
+
+	[Theory]
+	[InlineData("""{"messages":{}}""")]
+	[InlineData("""{"culture":null,"messages":{}}""")]
+	[InlineData("""{"culture":"en"}""")]
+	[InlineData("""{"culture":"en","messages":null}""")]
+	[InlineData("""{"culture":"en","keyValues":{}}""")]
+	public async Task InitializeAsync_RejectsInvalidResourceSchema(string content)
+	{
+		using var directory = new TemporaryDirectory();
+		await directory.WriteFileAsync("invalid.json", content);
+		var previous = TestFactory.CreateContainer("de");
+		var (initializer, provider) = CreateInitializer(previous);
+
+		await Assert.ThrowsAsync<InvalidDataException>(
+			() => initializer.InitializeAsync(directory.Path));
+
+		Assert.Same(previous, provider.Find(CultureInfo.GetCultureInfo("de")));
+	}
+
+	[Fact]
 	public async Task InitializeAsync_CanceledTokenPreservesPreviousSnapshot()
 	{
 		using var directory = new TemporaryDirectory();
-		var previous = TestFactory.CreateContainer("en");
+		var previous = TestFactory.CreateContainer();
 		var (initializer, provider) = CreateInitializer(previous);
 
 		await Assert.ThrowsAsync<OperationCanceledException>(
@@ -191,8 +226,8 @@ public sealed class DirectoryLocalizerInitializerTests
 	public async Task InitializeAsync_RejectsMissingDirectory()
 	{
 		var (initializer, _) = CreateInitializer();
-		var path = System.IO.Path.Combine(
-			System.IO.Path.GetTempPath(),
+		var path = Path.Combine(
+			Path.GetTempPath(),
 			$"Locan.Tests.Missing.{Guid.NewGuid():N}");
 
 		await Assert.ThrowsAsync<DirectoryNotFoundException>(
@@ -200,7 +235,7 @@ public sealed class DirectoryLocalizerInitializerTests
 	}
 
 	private static (DirectoryLocalizerInitializer Initializer, LocalizerContainerProvider Provider)
-		CreateInitializer(params SegmentedLocalizerContainer[] containers)
+		CreateInitializer(params ILocalizerContainer[] containers)
 	{
 		var provider = TestFactory.CreateProvider(containers);
 		return (new DirectoryLocalizerInitializer(provider), provider);

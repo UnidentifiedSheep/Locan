@@ -17,10 +17,12 @@ public sealed class DirectoryLocalizerInitializer : ILocalizerInitializer
 
 	public async Task InitializeAsync(
 		string directoryPath,
+		string searchPattern = "*.json",
 		bool recursive = true,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentException.ThrowIfNullOrWhiteSpace(directoryPath);
+		ArgumentException.ThrowIfNullOrWhiteSpace(searchPattern);
 		cancellationToken.ThrowIfCancellationRequested();
 
 		var fullPath = Path.GetFullPath(directoryPath);
@@ -32,7 +34,7 @@ public sealed class DirectoryLocalizerInitializer : ILocalizerInitializer
 		var files = Directory
 			.EnumerateFiles(
 				fullPath,
-				"*.json",
+				searchPattern,
 				recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
 			.Order(StringComparer.Ordinal)
 			.ToArray();
