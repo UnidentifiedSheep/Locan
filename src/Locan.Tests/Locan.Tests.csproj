@@ -20,6 +20,9 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Locan\Locan.csproj" />
+        <ProjectReference Include="..\Locan.Hosting\Locan.Hosting.csproj" />
+        <ProjectReference Include="..\Locan.AspNetCore\Locan.AspNetCore.csproj" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
 
 </Project>

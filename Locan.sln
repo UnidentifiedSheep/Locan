@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locan.Tests", "src\Locan.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locan.Hosting", "src\Locan.Hosting\Locan.Hosting.csproj", "{1A3E049A-993F-4CFD-9F8C-F84B0AA4F353}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locan.AspNetCore", "src\Locan.AspNetCore\Locan.AspNetCore.csproj", "{76BFC14A-B7AC-4F70-8C71-C57918357ED7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{1A3E049A-993F-4CFD-9F8C-F84B0AA4F353}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A3E049A-993F-4CFD-9F8C-F84B0AA4F353}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A3E049A-993F-4CFD-9F8C-F84B0AA4F353}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76BFC14A-B7AC-4F70-8C71-C57918357ED7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76BFC14A-B7AC-4F70-8C71-C57918357ED7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76BFC14A-B7AC-4F70-8C71-C57918357ED7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76BFC14A-B7AC-4F70-8C71-C57918357ED7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
