@@ -36,8 +36,8 @@ internal ref struct TemplateReader
 		while (!End && Current is not ('{' or '}'))
 			Advance();
 
-		return _source[start..Position];
+		return _source.Slice(start, Position - start);
 	}
 
-	public ReadOnlySpan<char> Slice(int start, int end) => _source[start..end];
+	public ReadOnlySpan<char> Slice(int start, int end) => _source.Slice(start, end - start);
 }

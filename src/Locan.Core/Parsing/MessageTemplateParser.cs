@@ -9,8 +9,11 @@ public static class MessageTemplateParser
 		string template,
 		params MessageSegmentType[] allowed)
 	{
-		ArgumentNullException.ThrowIfNull(template);
-		ArgumentNullException.ThrowIfNull(allowed);
+		if (template is null)
+			throw new ArgumentNullException(nameof(template));
+
+		if (allowed is null)
+			throw new ArgumentNullException(nameof(allowed));
 
 		var syntax = TemplateSyntaxParser.Parse(template);
 		MessageTemplateValidator.Validate(syntax);

@@ -66,7 +66,7 @@ internal static class PlaceholderSyntaxParser
 
 	private static bool IsFormat(string value)
 	{
-		if (value.Length == 0 || char.IsWhiteSpace(value[0]) || char.IsWhiteSpace(value[^1]))
+		if (value.Length == 0 || char.IsWhiteSpace(value[0]) || char.IsWhiteSpace(value[value.Length - 1]))
 			return false;
 
 		for (var index = 0; index < value.Length; index++)

@@ -40,7 +40,7 @@ internal static class TemplateSyntaxParser
 				throw Error(reader.Position, "Unexpected closing brace");
 
 			StartText(text, reader.Position, ref textPosition);
-			text.Append(reader.ReadUntilBrace());
+			text.Append(reader.ReadUntilBrace().ToString());
 		}
 
 		FlushText(syntax, text, textPosition);

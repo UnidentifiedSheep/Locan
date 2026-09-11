@@ -1,3 +1,5 @@
+using Locan.Core.Compatibility;
+
 namespace Locan.Core.Exceptions;
 
 public sealed class PlaceholderValueNotFoundException : KeyNotFoundException
@@ -13,7 +15,7 @@ public sealed class PlaceholderValueNotFoundException : KeyNotFoundException
 
 	private static string CreateMessage(string placeholderKey)
 	{
-		ArgumentException.ThrowIfNullOrWhiteSpace(placeholderKey);
+		ArgumentGuard.NotNullOrWhiteSpace(placeholderKey, nameof(placeholderKey));
 		return $"Value for placeholder '{placeholderKey}' was not found.";
 	}
 }

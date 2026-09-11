@@ -1,3 +1,5 @@
+using Locan.Core.Compatibility;
+
 namespace Locan.Core.Exceptions;
 
 public sealed class MessageTemplateParseException : FormatException
@@ -15,8 +17,9 @@ public sealed class MessageTemplateParseException : FormatException
 
 	private static string CreateMessage(int position, string reason)
 	{
-		ArgumentOutOfRangeException.ThrowIfNegative(position);
-		ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+		if (position < 0)
+			throw new ArgumentOutOfRangeException(nameof(position));
+		ArgumentGuard.NotNullOrWhiteSpace(reason, nameof(reason));
 		return $"{reason} at position {position}.";
 	}
 }

@@ -1,4 +1,6 @@
-namespace Locan.Core.Attributes;
+using System;
+
+namespace Locan.Generator.Attributes;
 
 /// <summary>
 /// Specifies assembly that is used for localization source generation
@@ -11,7 +13,7 @@ public sealed class LocalizationModuleAttribute : Attribute
     {
         Name = name;
     }
-    
+
     /// <summary>
     /// Gets module name
     /// </summary>

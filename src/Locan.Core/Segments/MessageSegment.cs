@@ -9,7 +9,8 @@ public abstract record MessageSegment
 
 	protected MessageSegment(string value)
 	{
-		ArgumentNullException.ThrowIfNull(value);
+		if (value is null)
+			throw new ArgumentNullException(nameof(value));
 		Value = value;
 	}
 

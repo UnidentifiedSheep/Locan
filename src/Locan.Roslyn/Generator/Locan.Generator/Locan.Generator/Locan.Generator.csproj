@@ -29,6 +29,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\..\Locan.Core\Locan.Core.csproj" />
         <ProjectReference Include="..\..\..\Locan.Build\Locan.Build.csproj"
                           ReferenceOutputAssembly="false"
                           SkipGetTargetFrameworkProperties="true"
