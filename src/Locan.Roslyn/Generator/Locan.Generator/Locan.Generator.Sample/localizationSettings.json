@@ -1,9 +1,9 @@
 {
-  "defaultLocale": "ru",
+  "defaultCulture": "ru",
   "paths": [
     {
       "searchPattern": "*.json",
-      "path": ""
+      "folderPath": ""
     }
   ]
 }

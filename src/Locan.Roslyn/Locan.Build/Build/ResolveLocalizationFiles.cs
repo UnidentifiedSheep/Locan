@@ -14,6 +14,9 @@ public sealed class ResolveLocalizationFiles : Task
     [Output]
     public ITaskItem[] Files { get; set; } = [];
 
+    [Output]
+    public ITaskItem[] TemplateFiles { get; set; } = [];
+
     public override bool Execute()
     {
         if (!File.Exists(ConfigPath))
@@ -38,6 +41,14 @@ public sealed class ResolveLocalizationFiles : Task
                 return false;
             }
 
+            if (string.IsNullOrWhiteSpace(config.DefaultCulture))
+            {
+                Log.LogError("Locan default culture cannot be empty.");
+                return false;
+            }
+
+            var fullConfigPath = Path.GetFullPath(ConfigPath);
+
             var files = config.Paths
                 .SelectMany(options =>
                 {
@@ -54,8 +65,16 @@ public sealed class ResolveLocalizationFiles : Task
                         options.SearchPattern,
                         searchOption);
                 })
+                .Where(file => !string.Equals(
+                    Path.GetFullPath(file),
+                    fullConfigPath,
+                    StringComparison.OrdinalIgnoreCase))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToArray();
+
+            var templateFiles = files
+                .Where(file => IsTemplate(file, config.DefaultCulture))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             Files = files
                 .GroupBy(
@@ -68,7 +87,11 @@ public sealed class ResolveLocalizationFiles : Task
                     return groupedFiles.Length == 1
 						? [GenItem(groupedFiles[0], null)]
 						: GenerateUniqueItems(groupedFiles);
-				})
+                })
+                .ToArray();
+
+            TemplateFiles = Files
+                .Where(file => templateFiles.Contains(file.ItemSpec))
                 .ToArray();
 
             return true;
@@ -77,6 +100,58 @@ public sealed class ResolveLocalizationFiles : Task
         {
             Log.LogErrorFromException(exception);
             return false;
+        }
+    }
+
+    private static bool IsTemplate(
+        string filePath,
+        string defaultCulture)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(File.ReadAllText(filePath));
+            var root = document.RootElement;
+
+            if (root.ValueKind != JsonValueKind.Object)
+                throw new InvalidDataException("The root JSON value must be an object.");
+
+            if (!root.TryGetProperty("culture", out var cultureElement) ||
+                cultureElement.ValueKind != JsonValueKind.String ||
+                string.IsNullOrWhiteSpace(cultureElement.GetString()))
+            {
+                throw new InvalidDataException(
+                    "The localization file must contain a non-empty string property 'culture'.");
+            }
+
+            var isTemplate = false;
+
+            if (root.TryGetProperty("isTemplate", out var isTemplateElement))
+            {
+                if (isTemplateElement.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+                {
+                    throw new InvalidDataException(
+                        "The localization property 'isTemplate' must be a boolean.");
+                }
+
+                isTemplate = isTemplateElement.GetBoolean();
+            }
+
+            return isTemplate || string.Equals(
+                cultureElement.GetString(),
+                defaultCulture,
+                StringComparison.OrdinalIgnoreCase);
+        }
+        catch (JsonException exception)
+        {
+            throw new InvalidDataException(
+                $"Localization file '{filePath}' contains invalid JSON.",
+                exception);
+        }
+        catch (InvalidDataException exception)
+        {
+            throw new InvalidDataException(
+                $"Localization file '{filePath}' is invalid: {exception.Message}",
+                exception);
         }
     }
 
@@ -97,13 +172,10 @@ public sealed class ResolveLocalizationFiles : Task
                 .Select(parts => TakeLast(parts, depth))
                 .ToArray();
 
-            if (candidates.Distinct(
-                    StringComparer.OrdinalIgnoreCase).Count() != files.Count)
-            {
-                continue;
-            }
+            if (candidates.Distinct(StringComparer.OrdinalIgnoreCase).Count() != files.Count)
+				continue;
 
-            return files
+			return files
                 .Select((file, index) =>
                     GenItem(file, candidates[index]))
                 .ToArray();

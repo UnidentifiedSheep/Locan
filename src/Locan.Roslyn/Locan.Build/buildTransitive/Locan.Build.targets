@@ -17,6 +17,7 @@
         Condition="Exists('$(LocanConfigPath)')">
         <ResolveLocalizationFiles ConfigPath="$(LocanConfigPath)">
             <Output TaskParameter="Files" ItemName="_LocanLocalizationFiles" />
+            <Output TaskParameter="TemplateFiles" ItemName="_LocanLocalizationTemplateFiles" />
         </ResolveLocalizationFiles>
 
         <ItemGroup>
@@ -26,8 +27,8 @@
                 <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
             </Content>
 
-            <AdditionalFiles Include="@(_LocanLocalizationFiles)">
-                <TargetPath>%(_LocanLocalizationFiles.TargetPath)</TargetPath>
+            <AdditionalFiles Include="@(_LocanLocalizationTemplateFiles)">
+                <TargetPath>%(_LocanLocalizationTemplateFiles.TargetPath)</TargetPath>
             </AdditionalFiles>
         </ItemGroup>
     </Target>

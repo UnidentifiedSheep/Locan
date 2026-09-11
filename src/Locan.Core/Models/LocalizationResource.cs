@@ -9,6 +9,9 @@ public sealed class LocalizationResource
 	[Required]
 	public required string Culture { get; init; }
 
+	[JsonPropertyName("isTemplate")]
+	public bool IsTemplate { get; init; }
+
 	[JsonPropertyName("messages")]
 	[Required]
 	public required Dictionary<string, string> Messages { get; init; }
