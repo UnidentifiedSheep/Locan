@@ -1,5 +1,6 @@
 using System.Globalization;
 using Locan.AspNetCore;
+using Locan.Core.Models;
 using Locan.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;

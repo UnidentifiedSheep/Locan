@@ -1,4 +1,5 @@
 using Locan.Core.Interfaces.Initialization;
+using Locan.Core.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 

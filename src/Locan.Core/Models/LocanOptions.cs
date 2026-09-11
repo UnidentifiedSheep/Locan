@@ -1,4 +1,4 @@
-namespace Locan.Hosting;
+namespace Locan.Core.Models;
 
 public sealed class LocanOptions
 {

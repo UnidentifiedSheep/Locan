@@ -3,6 +3,7 @@ using Locan.Core.Interfaces.Containers;
 using Locan.Core.Interfaces.Initialization;
 using Locan.Core.Interfaces.Localizers;
 using Locan.Core.Interfaces.Rendering;
+using Locan.Core.Models;
 using Locan.Hosting;
 using Locan.Tests.TestInfrastructure;
 using Microsoft.Extensions.Configuration;
