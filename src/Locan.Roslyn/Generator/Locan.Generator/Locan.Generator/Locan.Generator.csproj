@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <IsPackable>false</IsPackable>
+        <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
 
@@ -11,6 +11,11 @@
 
         <RootNamespace>Locan.Generator</RootNamespace>
         <PackageId>Locan.Generator</PackageId>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+        <TargetsForTfmSpecificContentInPackage>
+            $(TargetsForTfmSpecificContentInPackage);PackLocanGeneratorAssemblies
+        </TargetsForTfmSpecificContentInPackage>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,5 +28,29 @@
         </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\Locan.Build\Locan.Build.csproj"
+                          ReferenceOutputAssembly="false"
+                          SkipGetTargetFrameworkProperties="true"
+                          AdditionalProperties="TargetFramework=net10.0"
+                          PrivateAssets="all" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\..\..\Locan.Build\buildTransitive\Locan.Build.targets"
+              Pack="true"
+              PackagePath="buildTransitive\Locan.Generator.targets" />
+    </ItemGroup>
+
+    <Target Name="PackLocanGeneratorAssemblies">
+        <ItemGroup>
+            <TfmSpecificPackageFile Include="$(TargetPath)"
+                                    PackagePath="analyzers\dotnet\cs" />
+            <TfmSpecificPackageFile Include="..\..\..\Locan.Build\bin\$(Configuration)\net10.0\Locan.Build.dll"
+                                    PackagePath="tools\net10.0" />
+            <TfmSpecificPackageFile Include="..\..\..\Locan.Build\bin\$(Configuration)\net10.0\Locan.Compiler.dll"
+                                    PackagePath="tools\net10.0" />
+        </ItemGroup>
+    </Target>
 
 </Project>
