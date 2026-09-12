@@ -11,6 +11,9 @@
 
         <RootNamespace>Locan.Generator</RootNamespace>
         <PackageId>Locan.Generator</PackageId>
+        <Description>Roslyn source generator for strongly typed Locan localization messages.</Description>
+        <PackageTags>$(PackageTags);roslyn;source-generator</PackageTags>
+        <IncludeSymbols>false</IncludeSymbols>
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
         <TargetsForTfmSpecificContentInPackage>

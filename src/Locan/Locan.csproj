@@ -4,6 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Description>JSON-based localization runtime for .NET.</Description>
     </PropertyGroup>
 
     <ItemGroup>
