@@ -9,9 +9,7 @@ public abstract record MessageSegment
 
 	protected MessageSegment(string value)
 	{
-		if (value is null)
-			throw new ArgumentNullException(nameof(value));
-		Value = value;
+		Value = value ?? throw new ArgumentNullException(nameof(value));
 	}
 
 	public static TextMessageSegment Text(string text) => new(text);

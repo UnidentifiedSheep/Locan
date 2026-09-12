@@ -77,9 +77,7 @@ public sealed class ResolveLocalizationFiles : Task
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             Files = files
-                .GroupBy(
-                    Path.GetFileName,
-                    StringComparer.OrdinalIgnoreCase)
+                .GroupBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase)
                 .SelectMany(group =>
                 {
                     var groupedFiles = group.ToArray();
@@ -118,22 +116,17 @@ public sealed class ResolveLocalizationFiles : Task
             if (!root.TryGetProperty("culture", out var cultureElement) ||
                 cultureElement.ValueKind != JsonValueKind.String ||
                 string.IsNullOrWhiteSpace(cultureElement.GetString()))
-            {
-                throw new InvalidDataException(
-                    "The localization file must contain a non-empty string property 'culture'.");
-            }
+				throw new InvalidDataException(
+					"The localization file must contain a non-empty string property 'culture'.");
 
-            var isTemplate = false;
+			var isTemplate = false;
 
             if (root.TryGetProperty("isTemplate", out var isTemplateElement))
             {
                 if (isTemplateElement.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
-                {
-                    throw new InvalidDataException(
-                        "The localization property 'isTemplate' must be a boolean.");
-                }
+					throw new InvalidDataException("The localization property 'isTemplate' must be a boolean.");
 
-                isTemplate = isTemplateElement.GetBoolean();
+				isTemplate = isTemplateElement.GetBoolean();
             }
 
             return isTemplate || string.Equals(
@@ -156,7 +149,7 @@ public sealed class ResolveLocalizationFiles : Task
     }
 
     private static IReadOnlyCollection<ITaskItem> GenerateUniqueItems(
-        IReadOnlyList<string> files)
+        string[] files)
     {
         var directories = files
             .Select(file => Path.GetDirectoryName(file)!)
@@ -172,7 +165,7 @@ public sealed class ResolveLocalizationFiles : Task
                 .Select(parts => TakeLast(parts, depth))
                 .ToArray();
 
-            if (candidates.Distinct(StringComparer.OrdinalIgnoreCase).Count() != files.Count)
+            if (candidates.Distinct(StringComparer.OrdinalIgnoreCase).Count() != files.Length)
 				continue;
 
 			return files
@@ -185,29 +178,20 @@ public sealed class ResolveLocalizationFiles : Task
     private static string[] SplitPath(string path)
     {
         var root = Path.GetPathRoot(path);
-
-        var relative = root is null
-            ? path
-            : path[root.Length..];
+        var relative = root is null ? path : path[root.Length..];
 
         return relative.Split(
             [Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar],
             StringSplitOptions.RemoveEmptyEntries);
     }
 
-    private static string TakeLast(
-        IReadOnlyList<string> parts,
-        int count)
+    private static string TakeLast(string[] parts, int count)
     {
-        var skip = Math.Max(0, parts.Count - count);
-
-        return Path.Combine(
-            parts.Skip(skip).ToArray());
+        var skip = Math.Max(0, parts.Length - count);
+        return Path.Combine(parts.Skip(skip).ToArray());
     }
 
-    private static ITaskItem GenItem(
-        string filePath,
-        string? moduleName)
+    private static TaskItem GenItem(string filePath, string? moduleName)
     {
         var item = new TaskItem(filePath);
 

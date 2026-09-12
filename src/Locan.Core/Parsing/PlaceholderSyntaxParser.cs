@@ -28,7 +28,7 @@ internal static class PlaceholderSyntaxParser
 			type = parts[1];
 			var typePosition = contentPosition + key.Length + 1;
 
-			if (!IsIdentifier(type))
+			if (!IsType(type))
 				throw Error(typePosition, "Invalid placeholder type");
 		}
 
@@ -50,12 +50,19 @@ internal static class PlaceholderSyntaxParser
 			return false;
 
 		for (var index = 1; index < value.Length; index++)
-		{
 			if (!IsIdentifierPart(value[index]))
 				return false;
-		}
 
 		return true;
+	}
+
+	private static bool IsType(string value)
+	{
+		var identifier = value.EndsWith("?", StringComparison.Ordinal)
+			? value.Substring(0, value.Length - 1)
+			: value;
+
+		return IsIdentifier(identifier);
 	}
 
 	private static bool IsIdentifierStart(char value) =>

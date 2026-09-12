@@ -23,6 +23,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Locan.Generator\Locan.Generator.csproj"/>
+        <ProjectReference Include="..\..\..\..\Locan\Locan.csproj" />
     </ItemGroup>
 
 

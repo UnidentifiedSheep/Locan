@@ -47,6 +47,8 @@
         <ItemGroup>
             <TfmSpecificPackageFile Include="$(TargetPath)"
                                     PackagePath="analyzers\dotnet\cs" />
+            <TfmSpecificPackageFile Include="$(TargetDir)Locan.Core.dll"
+                                    PackagePath="analyzers\dotnet\cs" />
             <TfmSpecificPackageFile Include="..\..\..\Locan.Build\bin\$(Configuration)\net10.0\Locan.Build.dll"
                                     PackagePath="tools\net10.0" />
             <TfmSpecificPackageFile Include="..\..\..\Locan.Build\bin\$(Configuration)\net10.0\Locan.Compiler.dll"

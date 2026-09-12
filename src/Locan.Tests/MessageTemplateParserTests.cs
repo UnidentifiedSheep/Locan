@@ -43,6 +43,17 @@ public sealed class MessageTemplateParserTests
 	}
 
 	[Fact]
+	public void Parse_PlaceholderWithNullableTypePreservesQuestionMark()
+	{
+		var segments = MessageTemplateParser.Parse("{Value|Int32?}");
+
+		AssertSegments(
+			segments,
+			MessageSegment.Placeholder("Value"),
+			MessageSegment.Type("Int32?"));
+	}
+
+	[Fact]
 	public void Parse_PlaceholderWithTypeAndFormatReturnsThreeSegments()
 	{
 		var segments = MessageTemplateParser.Parse("{Price|Decimal|F2}");
@@ -306,6 +317,9 @@ public sealed class MessageTemplateParserTests
 	[InlineData("{1Value}")]
 	[InlineData("{Имя}")]
 	[InlineData("{Value|System.DateTime}")]
+	[InlineData("{Value|?}")]
+	[InlineData("{Value|Int32??}")]
+	[InlineData("{Value|Int?32}")]
 	[InlineData("text }")]
 	public void Parse_RejectsInvalidTemplate(string template)
 		=> Assert.Throws<MessageTemplateParseException>(() => MessageTemplateParser.Parse(template));
