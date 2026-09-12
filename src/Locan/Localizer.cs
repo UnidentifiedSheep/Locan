@@ -33,7 +33,7 @@ public class Localizer : ILocalizer
 
 		return !container.TryGetValue(message.MessageKey, out var template)
 			? throw new MessageTemplateNotFoundException(message.MessageKey)
-			: _renderer.Render(template, message);
+			: _renderer.Render(template, message, culture);
 	}
 
 	public bool TryGet(
@@ -49,6 +49,7 @@ public class Localizer : ILocalizer
 			return _renderer.TryRender(
 				segmentsContainer,
 				message,
+				culture,
 				out value);
 
 		value = null;

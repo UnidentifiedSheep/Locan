@@ -51,7 +51,7 @@ internal sealed class MessageCatalogBuilder
 		{
 			_definitions.Add(
 				className,
-				new MessageDefinition(key, className, placeholders));
+				new MessageDefinition(key, className, template, placeholders));
 			return;
 		}
 

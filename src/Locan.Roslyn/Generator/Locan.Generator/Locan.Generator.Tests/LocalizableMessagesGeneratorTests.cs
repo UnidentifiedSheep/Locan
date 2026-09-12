@@ -45,13 +45,18 @@ public sealed class LocalizableMessagesGeneratorTests
 			1234);
 
 		Assert.Equal("article.not.found", notFound.MessageKey);
-		Assert.Equal("SKU-42", stock.Values["Sku"]);
-		Assert.Equal("-3", stock.Values["Delta"]);
-		Assert.Equal("42", reservation.Values["ReservationId"]);
-		Assert.Equal("True", reservation.Values["IsActive"]);
-		Assert.Equal("12.50", price.Values["Price"]);
-		Assert.Equal("2026-09-12 13:45:10", completed.Values["CompletedAt"]);
-		Assert.Equal("1,234", completed.Values["Count"]);
+		Assert.Equal("SKU-42", stock.Values["Sku"].Value);
+		Assert.Equal(-3, stock.Values["Delta"].Value);
+		Assert.Equal(42L, reservation.Values["ReservationId"].Value);
+		Assert.Equal(true, reservation.Values["IsActive"].Value);
+		Assert.Equal(12.5m, price.Values["Price"].Value);
+		Assert.Equal("F2", price.Values["Price"].Format);
+		Assert.Equal(
+			new DateTime(2026, 9, 12, 13, 45, 10, DateTimeKind.Utc),
+			completed.Values["CompletedAt"].Value);
+		Assert.Equal("yyyy-MM-dd HH:mm:ss", completed.Values["CompletedAt"].Format);
+		Assert.Equal(1234, completed.Values["Count"].Value);
+		Assert.Equal("N0", completed.Values["Count"].Format);
 	}
 
 	[Fact]
@@ -101,6 +106,14 @@ public sealed class LocalizableMessagesGeneratorTests
 		Assert.Contains(
 			"Create(int Number, global::System.DateTime Date, string Source)",
 			invoiceSource);
+		Assert.Contains(
+			"Default culture template: <c>Invoice {Number|int} was paid at {Date|dateTIME|yyyy-MM-dd} by {Source|UnknownType}</c>",
+			invoiceSource);
+		Assert.Contains(
+			"<param name=\"Date\">Type: <c>global::System.DateTime</c>. Format: <c>yyyy-MM-dd</c>.</param>",
+			invoiceSource);
+		Assert.Contains("message.WithValue(\"Date\", Date, \"yyyy-MM-dd\");", invoiceSource);
+		Assert.DoesNotContain("FormatValue", invoiceSource);
 		Assert.Contains("public InvoicePaidMessage WithNumber(int value)", invoiceSource);
 		Assert.Contains("return this;", invoiceSource);
 

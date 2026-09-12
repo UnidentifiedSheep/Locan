@@ -26,7 +26,8 @@ public sealed class LocalizableMessageTests
 	{
 		_message.WithValue("Name", "Alex");
 
-		Assert.Equal("Alex", _message.Values["Name"]);
+		Assert.Equal("Alex", _message.Values["Name"].Value);
+		Assert.Null(_message.Values["Name"].Format);
 	}
 
 	[Fact]
@@ -37,7 +38,7 @@ public sealed class LocalizableMessageTests
 		_message.WithValue("Name", "Second");
 
 		Assert.Single(_message.Values);
-		Assert.Equal("Second", _message.Values["Name"]);
+		Assert.Equal("Second", _message.Values["Name"].Value);
 	}
 
 	[Fact]
@@ -46,7 +47,16 @@ public sealed class LocalizableMessageTests
 		_message.WithValue("Name", null);
 
 		Assert.True(_message.Values.ContainsKey("Name"));
-		Assert.Null(_message.Values["Name"]);
+		Assert.Null(_message.Values["Name"].Value);
+	}
+
+	[Fact]
+	public void WithValue_StoresRawValueAndFormat()
+	{
+		_message.WithValue("Price", 1234.5m, "N2");
+
+		Assert.Equal(1234.5m, _message.Values["Price"].Value);
+		Assert.Equal("N2", _message.Values["Price"].Format);
 	}
 
 	[Theory]

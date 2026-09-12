@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Locan.Core.Enums;
 using Locan.Core.Exceptions;
 using Locan.Core.Interfaces;
@@ -12,20 +13,26 @@ public sealed class SegmentedMessageTemplateRenderer : IMessageTemplateRenderer
 	public bool TryRender(
 		IMessageSegmentsContainer segmentsContainer,
 		ILocalizableMessage message,
+		CultureInfo culture,
 		[NotNullWhen(true)] out string? rendered)
 	{
 		return RenderCore(
 			segmentsContainer,
 			message,
+			culture,
 			out rendered,
 			out _);
 	}
 
-	public string Render(IMessageSegmentsContainer segmentsContainer, ILocalizableMessage message)
+	public string Render(
+		IMessageSegmentsContainer segmentsContainer,
+		ILocalizableMessage message,
+		CultureInfo culture)
 	{
 		return RenderCore(
 			segmentsContainer,
 			message,
+			culture,
 			out var rendered,
 			out var missingKey)
 			? rendered
@@ -35,21 +42,30 @@ public sealed class SegmentedMessageTemplateRenderer : IMessageTemplateRenderer
 	private static bool RenderCore(
 		IMessageSegmentsContainer segmentsContainer,
 		ILocalizableMessage message,
+		CultureInfo culture,
 		[NotNullWhen(true)] out string? rendered,
 		out string? missingKey)
 	{
 		ArgumentNullException.ThrowIfNull(segmentsContainer);
 		ArgumentNullException.ThrowIfNull(message);
+		ArgumentNullException.ThrowIfNull(culture);
 
 		missingKey = null;
 
 		var valuesLength = 0;
+		var formattedValues = new Dictionary<string, string?>(StringComparer.Ordinal);
 
 		for (var i = 0; i < segmentsContainer.Count; i++)
 		{
 			var segment = segmentsContainer[i];
 
 			if (segment.Kind != MessageSegmentType.Placeholder) continue;
+
+			if (formattedValues.TryGetValue(segment.Value, out var formattedValue))
+			{
+				valuesLength += formattedValue?.Length ?? 0;
+				continue;
+			}
 
 			if (!message.Values.TryGetValue(segment.Value, out var value))
 			{
@@ -58,12 +74,14 @@ public sealed class SegmentedMessageTemplateRenderer : IMessageTemplateRenderer
 				return false;
 			}
 
-			valuesLength += value?.Length ?? 0;
+			formattedValue = FormatValue(value.Value, value.Format, culture);
+			formattedValues.Add(segment.Value, formattedValue);
+			valuesLength += formattedValue?.Length ?? 0;
 		}
 
 		rendered = string.Create(
 			length: segmentsContainer.TextSegmentsTotalLength + valuesLength,
-			state: (segmentsContainer, message.Values),
+			state: (segmentsContainer, formattedValues),
 			action: static (destination, state) =>
 			{
 				var (segments, values) = state;
@@ -111,5 +129,18 @@ public sealed class SegmentedMessageTemplateRenderer : IMessageTemplateRenderer
 
 		value.AsSpan().CopyTo(destination[offset..]);
 		return offset + value.Length;
+	}
+
+	private static string? FormatValue(
+		object? value,
+		string? format,
+		CultureInfo culture)
+	{
+		if (value is null)
+			return null;
+
+		return value is IFormattable formattable
+			? formattable.ToString(format, culture)
+			: value.ToString();
 	}
 }

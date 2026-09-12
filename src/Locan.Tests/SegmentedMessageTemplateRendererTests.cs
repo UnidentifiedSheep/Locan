@@ -1,3 +1,4 @@
+using System.Globalization;
 using Locan.Core.Exceptions;
 using Locan.LocalizableMessages;
 using Locan.TemplateRenderers;
@@ -8,6 +9,7 @@ namespace Locan.Tests;
 public sealed class SegmentedMessageTemplateRendererTests
 {
 	private readonly SegmentedMessageTemplateRenderer _renderer = new();
+	private readonly CultureInfo _culture = CultureInfo.InvariantCulture;
 
 	[Fact]
 	public void Render_ReturnsTextWithoutPlaceholders()
@@ -15,7 +17,7 @@ public sealed class SegmentedMessageTemplateRendererTests
 		var template = TestFactory.CreateTemplate("plain text");
 		var message = new LocalizableMessage("Message");
 
-		var result = _renderer.Render(template, message);
+		var result = _renderer.Render(template, message, _culture);
 
 		Assert.Equal("plain text", result);
 	}
@@ -28,7 +30,7 @@ public sealed class SegmentedMessageTemplateRendererTests
 			.WithValue("Greeting", "Hello")
 			.WithValue("Name", "Alex");
 
-		var result = _renderer.Render(template, message);
+		var result = _renderer.Render(template, message, _culture);
 
 		Assert.Equal("Hello, Alex!", result);
 	}
@@ -39,7 +41,7 @@ public sealed class SegmentedMessageTemplateRendererTests
 		var template = TestFactory.CreateTemplate("{Value}-{Value}");
 		var message = new LocalizableMessage("Message").WithValue("Value", "A");
 
-		var result = _renderer.Render(template, message);
+		var result = _renderer.Render(template, message, _culture);
 
 		Assert.Equal("A-A", result);
 	}
@@ -50,7 +52,7 @@ public sealed class SegmentedMessageTemplateRendererTests
 		var template = TestFactory.CreateTemplate("before{Value}after");
 		var message = new LocalizableMessage("Message").WithValue("Value", null);
 
-		var result = _renderer.Render(template, message);
+		var result = _renderer.Render(template, message, _culture);
 
 		Assert.Equal("beforeafter", result);
 	}
@@ -62,7 +64,7 @@ public sealed class SegmentedMessageTemplateRendererTests
 		var message = new LocalizableMessage("Message");
 
 		var exception = Assert.Throws<PlaceholderValueNotFoundException>(
-			() => _renderer.Render(template, message));
+			() => _renderer.Render(template, message, _culture));
 
 		Assert.Equal("Missing", exception.PlaceholderKey);
 	}
@@ -73,7 +75,7 @@ public sealed class SegmentedMessageTemplateRendererTests
 		var template = TestFactory.CreateTemplate("Hello {Name}");
 		var message = new LocalizableMessage("Message").WithValue("Name", "Alex");
 
-		var result = _renderer.TryRender(template, message, out var rendered);
+		var result = _renderer.TryRender(template, message, _culture, out var rendered);
 
 		Assert.True(result);
 		Assert.Equal("Hello Alex", rendered);
@@ -85,7 +87,7 @@ public sealed class SegmentedMessageTemplateRendererTests
 		var template = TestFactory.CreateTemplate("{Missing}");
 		var message = new LocalizableMessage("Message");
 
-		var result = _renderer.TryRender(template, message, out var rendered);
+		var result = _renderer.TryRender(template, message, _culture, out var rendered);
 
 		Assert.False(result);
 		Assert.Null(rendered);
@@ -95,13 +97,36 @@ public sealed class SegmentedMessageTemplateRendererTests
 	public void Render_RejectsNullTemplate()
 	{
 		Assert.Throws<ArgumentNullException>(() =>
-			_renderer.Render(null!, new LocalizableMessage("Message")));
+			_renderer.Render(null!, new LocalizableMessage("Message"), _culture));
 	}
 
 	[Fact]
 	public void Render_RejectsNullMessage()
 	{
 		Assert.Throws<ArgumentNullException>(() =>
-			_renderer.Render(TestFactory.CreateTemplate("text"), null!));
+			_renderer.Render(TestFactory.CreateTemplate("text"), null!, _culture));
+	}
+
+	[Fact]
+	public void Render_FormatsValueUsingSpecifiedCulture()
+	{
+		var template = TestFactory.CreateTemplate("Value: {Value}");
+		var message = new LocalizableMessage("Message")
+			.WithValue("Value", 1234.5m, "N2");
+		var culture = CultureInfo.GetCultureInfo("fr-FR");
+
+		var result = _renderer.Render(template, message, culture);
+
+		Assert.Equal($"Value: {1234.5m.ToString("N2", culture)}", result);
+	}
+
+	[Fact]
+	public void Render_RejectsNullCulture()
+	{
+		Assert.Throws<ArgumentNullException>(() =>
+			_renderer.Render(
+				TestFactory.CreateTemplate("text"),
+				new LocalizableMessage("Message"),
+				null!));
 	}
 }

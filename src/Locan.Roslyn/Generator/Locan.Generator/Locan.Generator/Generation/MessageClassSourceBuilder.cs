@@ -25,6 +25,7 @@ internal static class MessageClassSourceBuilder
 		writer.WriteLine();
 		writer.WriteLine($"namespace {module.Name}");
 		writer.OpenBlock();
+		WriteClassDocumentation(writer, definition, placeholders);
 		writer.WriteLine(
 			$"{GetAccessibility(module)} partial class {definition.ClassName} : {BaseClass}");
 		writer.OpenBlock();
@@ -45,8 +46,6 @@ internal static class MessageClassSourceBuilder
 				methodNames[placeholder.Key]);
 		}
 
-		writer.WriteLine();
-		WriteFormatMethod(writer);
 		writer.CloseBlock();
 		writer.CloseBlock();
 
@@ -55,6 +54,31 @@ internal static class MessageClassSourceBuilder
 
 	private static string GetAccessibility(ModuleOptions module) =>
 		module.IsInternal ? "internal" : "public";
+
+	private static void WriteClassDocumentation(
+		IndentedTextWriter writer,
+		MessageDefinition definition,
+		List<PlaceholderInfo> placeholders)
+	{
+		writer.WriteLine("/// <summary>");
+		writer.WriteLine($"/// Localization message <c>{Xml(definition.Key)}</c>.");
+		writer.WriteLine($"/// <para>Default culture template: <c>{Xml(definition.Template)}</c></para>");
+		writer.WriteLine("/// </summary>");
+
+		if (placeholders.Count == 0)
+			return;
+
+		writer.WriteLine("/// <remarks>");
+		writer.WriteLine("/// <para>Placeholders:<br/>");
+
+		foreach (var placeholder in placeholders)
+			writer.WriteLine(
+				$"/// <c>{Xml(placeholder.Key)}</c> — " +
+				$"{GetPlaceholderDescription(placeholder)}<br/>");
+
+		writer.WriteLine("/// </para>");
+		writer.WriteLine("/// </remarks>");
+	}
 
 	private static void WriteConstructor(
 		IndentedTextWriter writer,
@@ -77,16 +101,25 @@ internal static class MessageClassSourceBuilder
 				$"{CSharpNames.GetTypeName(placeholder.Type)} " +
 				CSharpNames.EscapeIdentifier(placeholder.Key));
 
+		writer.WriteLine($"/// <summary>Creates a <see cref=\"{definition.ClassName}\"/>.</summary>");
+
+		foreach (var placeholder in placeholders)
+			writer.WriteLine(
+				$"/// <param name=\"{Xml(placeholder.Key)}\">" +
+				$"{GetPlaceholderDescription(placeholder)}</param>");
+
+		writer.WriteLine("/// <returns>The initialized localization message.</returns>");
+
 		writer.WriteLine(
 			$"public static {definition.ClassName} Create({string.Join(", ", parameters)})");
 		writer.OpenBlock();
 		writer.WriteLine($"var message = new {definition.ClassName}();");
 
 		foreach (var placeholder in placeholders)
-			writer.WriteLine(
-				$"message.WithValue({CSharpNames.Literal(placeholder.Key)}, " +
-				$"FormatValue({CSharpNames.EscapeIdentifier(placeholder.Key)}, " +
-				$"{CSharpNames.Literal(placeholder.Format)}));");
+			writer.WriteLine(GetWithValueInvocation(
+				"message.",
+				placeholder,
+				CSharpNames.EscapeIdentifier(placeholder.Key)));
 
 		writer.WriteLine("return message;");
 		writer.CloseBlock();
@@ -102,31 +135,21 @@ internal static class MessageClassSourceBuilder
 			$"public {definition.ClassName} {methodName}(" +
 			$"{CSharpNames.GetTypeName(placeholder.Type)} value)");
 		writer.OpenBlock();
-		writer.WriteLine(
-			$"WithValue({CSharpNames.Literal(placeholder.Key)}, " +
-			$"FormatValue(value, {CSharpNames.Literal(placeholder.Format)}));");
+		writer.WriteLine(GetWithValueInvocation(string.Empty, placeholder, "value"));
 		writer.WriteLine("return this;");
 		writer.CloseBlock();
 	}
 
-	private static void WriteFormatMethod(IndentedTextWriter writer)
+	private static string GetWithValueInvocation(
+		string target,
+		PlaceholderInfo placeholder,
+		string value)
 	{
-		writer.WriteLine("private static string? FormatValue<T>(T value, string? format)");
-		writer.OpenBlock();
-		writer.WriteLine("if (value is null)");
-		writer.OpenBlock();
-		writer.WriteLine("return null;");
-		writer.CloseBlock();
-		writer.WriteLine();
-		writer.WriteLine("if (value is global::System.IFormattable formattable)");
-		writer.OpenBlock();
-		writer.WriteLine(
-			"return formattable.ToString(format, " +
-			"global::System.Globalization.CultureInfo.InvariantCulture);");
-		writer.CloseBlock();
-		writer.WriteLine();
-		writer.WriteLine("return value.ToString();");
-		writer.CloseBlock();
+		var format = string.IsNullOrWhiteSpace(placeholder.Format)
+			? string.Empty
+			: $", {CSharpNames.Literal(placeholder.Format)}";
+
+		return $"{target}WithValue({CSharpNames.Literal(placeholder.Key)}, {value}{format});";
 	}
 
 	private static IReadOnlyDictionary<string, string> CreateMethodNames(
@@ -155,4 +178,22 @@ internal static class MessageClassSourceBuilder
 
 		return result;
 	}
+
+	private static string GetPlaceholderDescription(PlaceholderInfo placeholder)
+	{
+		var description =
+			$"Type: <c>{Xml(CSharpNames.GetTypeName(placeholder.Type))}</c>.";
+
+		if (!string.IsNullOrWhiteSpace(placeholder.Format))
+			description += $" Format: <c>{Xml(placeholder.Format!)}</c>.";
+
+		return description;
+	}
+
+	private static string Xml(string value) =>
+		value.Replace("&", "&amp;")
+			.Replace("<", "&lt;")
+			.Replace(">", "&gt;")
+			.Replace("\"", "&quot;")
+			.Replace("'", "&apos;");
 }

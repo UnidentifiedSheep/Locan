@@ -47,6 +47,20 @@ public sealed class LocalizerTests
 		Assert.Null(value);
 	}
 
+	[Fact]
+	public void Get_FormatsValuesUsingRequestedCulture()
+	{
+		var culture = CultureInfo.GetCultureInfo("fr-FR");
+		var container = CreateContainer(culture.Name, "Value: {Value}");
+		var localizer = TestFactory.CreateLocalizer(container);
+		var message = new LocalizableMessage("Greeting")
+			.WithValue("Value", 1234.5m, "N2");
+
+		var result = localizer.Get(message, culture);
+
+		Assert.Equal($"Value: {1234.5m.ToString("N2", culture)}", result);
+	}
+
 	private static SegmentedLocalizerContainer CreateContainer(
 		string culture,
 		string template) => TestFactory.CreateContainer(
