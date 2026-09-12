@@ -1,14 +1,14 @@
 # Locan
 
-Locan is a strongly typed localization library for .NET with JSON resources and a Roslyn source generator.
+Locan is a strongly typed localization library for .NET. It keeps translations in JSON, generates message classes at compile time, and renders them using the current UI culture.
 
-## Packages
+## Why Locan
 
-- `Locan.Core` — shared contracts and localization models.
-- `Locan` — localization runtime.
-- `Locan.Hosting` — dependency injection and hosted initialization.
-- `Locan.AspNetCore` — ASP.NET Core integration.
-- `Locan.Generator` — strongly typed message source generator.
+- Message keys become discoverable C# types instead of string literals.
+- Placeholder names, types, and formats are captured by the source generator.
+- Culture-aware formatting uses standard .NET format strings.
+- Runtime resources support parent-culture fallback such as `ru-RU` to `ru`.
+- Hosting and ASP.NET Core integrations load resources and select the request culture.
 
 ## Installation
 
@@ -19,7 +19,7 @@ dotnet add package Locan.AspNetCore
 dotnet add package Locan.Generator
 ```
 
-## Source generator
+## Two-minute example
 
 Add `localizationSettings.json` to the project directory:
 
@@ -44,7 +44,7 @@ using Locan.Generator.Attributes;
 [assembly: LocalizationModule("MyApplication.Messages")]
 ```
 
-Define the default-culture resource:
+Create `Localization/localization-en.json`:
 
 ```json
 {
@@ -56,7 +56,70 @@ Define the default-culture resource:
 }
 ```
 
-The generator creates strongly typed classes such as `ArticleNotFoundMessage` and `ArticlePriceUpdatedMessage`.
+The generator turns `article.price.updated` into a class with a typed factory:
+
+```csharp
+using Locan.Core.LocalizableMessages;
+
+public partial class ArticlePriceUpdatedMessage : LocalizableMessage
+{
+    public const string Key = "article.price.updated";
+
+    public ArticlePriceUpdatedMessage() : base(Key, 1) { }
+
+    public static ArticlePriceUpdatedMessage Create(decimal Price)
+    {
+        var message = new ArticlePriceUpdatedMessage();
+        message.WithValue("Price", Price, "F2");
+        return message;
+    }
+
+    public ArticlePriceUpdatedMessage WithPrice(decimal value)
+    {
+        WithValue("Price", value, "F2");
+        return this;
+    }
+}
+```
+
+Use the generated class through Locan's contextual localizer:
+
+```csharp
+using Locan.AspNetCore;
+using Locan.Core.Interfaces.Localizers;
+using MyApplication.Messages;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddLocanAspNetCore(options =>
+{
+    options.DefaultCulture = "en";
+    options.SupportedCultures = ["en", "ru"];
+});
+
+var app = builder.Build();
+app.UseLocanRequestLocalization();
+
+app.MapGet("/price", (IContextualLocalizer localizer) =>
+    localizer.Get(ArticlePriceUpdatedMessage.Create(12.5m)));
+
+app.Run();
+```
+
+For the English request culture, the result is `Price updated to 12.50.`. Resource files matched by the settings file are copied to the application's `Locan` output directory automatically.
+
+## Packages
+
+- `Locan.Core` — shared contracts, models, and template parsing primitives.
+- `Locan` — resource loading, culture lookup, and message rendering.
+- `Locan.Hosting` — dependency injection and hosted initialization.
+- `Locan.AspNetCore` — request-culture integration for ASP.NET Core.
+- `Locan.Generator` — build integration and the strongly typed source generator.
+
+## Documentation
+
+- [Configuration and resources](docs/configuration.md)
+- [Message templates](docs/templates.md)
+- [Source generator](docs/source-generator.md)
 
 ## License
 
