@@ -32,7 +32,7 @@ internal static class MessageClassSourceBuilder
 		writer.WriteLine($"public const string Key = {CSharpNames.Literal(definition.Key)};");
 		writer.WriteLine();
 
-		WriteConstructor(writer, definition);
+		WriteConstructor(writer, definition, placeholders);
 		writer.WriteLine();
 		WriteFactoryMethod(writer, definition, placeholders);
 
@@ -82,9 +82,10 @@ internal static class MessageClassSourceBuilder
 
 	private static void WriteConstructor(
 		IndentedTextWriter writer,
-		MessageDefinition definition)
+		MessageDefinition definition,
+		List<PlaceholderInfo> placeholders)
 	{
-		writer.WriteLine($"public {definition.ClassName}() : base(Key)");
+		writer.WriteLine($"public {definition.ClassName}() : base(Key, {placeholders.Count})");
 		writer.OpenBlock();
 		writer.CloseBlock();
 	}

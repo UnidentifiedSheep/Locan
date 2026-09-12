@@ -7,13 +7,14 @@ namespace Locan.Core.LocalizableMessages;
 public class LocalizableMessage : ILocalizableMessage
 {
 	public string MessageKey { get; }
-	protected readonly Dictionary<string, LocalizableMessageValue> ValuesDict = new();
+	protected readonly Dictionary<string, LocalizableMessageValue> ValuesDict;
 	public IReadOnlyDictionary<string, LocalizableMessageValue> Values => ValuesDict;
 
-	public LocalizableMessage(string messageKey)
+	public LocalizableMessage(string messageKey, int capacity = 0)
 	{
 		ArgumentGuard.NotNullOrWhiteSpace(messageKey, nameof(messageKey));
 		MessageKey = messageKey;
+		ValuesDict = new Dictionary<string, LocalizableMessageValue>(capacity);
 	}
 
 	public virtual ILocalizableMessage WithValue(

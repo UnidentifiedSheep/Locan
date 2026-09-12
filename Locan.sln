@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locan.Build", "src\Locan.Ro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locan.Compiler", "src\Locan.Roslyn\Locan.Compiler\Locan.Compiler.csproj", "{8CB04EA5-7397-4187-AC0B-9C9F5E60349A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locan.Benchmark", "src\Locan.Benchmark\Locan.Benchmark.csproj", "{B4287EB1-5165-4241-AB6A-D8DB721B5375}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,10 @@ Global
 		{8CB04EA5-7397-4187-AC0B-9C9F5E60349A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CB04EA5-7397-4187-AC0B-9C9F5E60349A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CB04EA5-7397-4187-AC0B-9C9F5E60349A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4287EB1-5165-4241-AB6A-D8DB721B5375}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4287EB1-5165-4241-AB6A-D8DB721B5375}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4287EB1-5165-4241-AB6A-D8DB721B5375}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4287EB1-5165-4241-AB6A-D8DB721B5375}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{782241E7-2DD6-4F31-BD51-393D95B5F59C} = {E1683B0B-0E80-4B17-8B17-F3FD1E9FF000}
