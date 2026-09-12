@@ -92,22 +92,23 @@ jobs:
         run: |
           smoke_directory="$RUNNER_TEMP/locan-package-smoke"
           dotnet new classlib --framework net10.0 --output "$smoke_directory"
-          dotnet add "$smoke_directory" package Locan.Generator \
-            --version "$PACKAGE_VERSION" \
-            --no-restore
 
-          cat > "$smoke_directory/localizationSettings.json" <<'JSON'
-          {
-            "defaultCulture": "en",
-            "paths": [
-              {
-                "searchPattern": "localization-*.json",
-                "folderPath": "",
-                "recursive": false
-              }
-            ]
-          }
-          JSON
+          cat > "$smoke_directory/locan-package-smoke.csproj" <<XML
+          <Project Sdk="Microsoft.NET.Sdk">
+            <PropertyGroup>
+              <TargetFramework>net10.0</TargetFramework>
+              <Nullable>enable</Nullable>
+              <LocanDefaultCulture>en</LocanDefaultCulture>
+            </PropertyGroup>
+
+            <ItemGroup>
+              <PackageReference Include="Locan.Generator" Version="$PACKAGE_VERSION" />
+              <LocanResource Include="localization-en.json"
+                             GenerateMessages="true"
+                             CopyToOutput="false" />
+            </ItemGroup>
+          </Project>
+          XML
 
           cat > "$smoke_directory/localization-en.json" <<'JSON'
           {
@@ -136,6 +137,7 @@ jobs:
             --source "$GITHUB_WORKSPACE/artifacts/packages" \
             --source https://api.nuget.org/v3/index.json
           dotnet build "$smoke_directory" --configuration Release --no-restore
+          test ! -e "$smoke_directory/bin/Release/net10.0/Locan/localization-en.json"
 
       - name: Upload packages
         uses: actions/upload-artifact@v4
