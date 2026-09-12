@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using Locan.Core.Interfaces;
 using Locan.Generator.Tests.Utils;
-using Locan.LocalizableMessages;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
@@ -142,8 +141,7 @@ public sealed class LocalizableMessagesGeneratorTests
 		return
 		[
 			.. frameworkAssemblies,
-			MetadataReference.CreateFromFile(typeof(ILocalizableMessage).Assembly.Location),
-			MetadataReference.CreateFromFile(typeof(LocalizableMessage).Assembly.Location)
+			MetadataReference.CreateFromFile(typeof(ILocalizableMessage).Assembly.Location)
 		];
 	}
 }

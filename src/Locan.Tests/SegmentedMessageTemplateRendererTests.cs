@@ -1,6 +1,6 @@
 using System.Globalization;
 using Locan.Core.Exceptions;
-using Locan.LocalizableMessages;
+using Locan.Core.LocalizableMessages;
 using Locan.TemplateRenderers;
 using Locan.Tests.TestInfrastructure;
 

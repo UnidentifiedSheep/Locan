@@ -15,7 +15,7 @@
         <PackageTags>$(PackageTags);roslyn;source-generator</PackageTags>
         <IncludeSymbols>false</IncludeSymbols>
         <IncludeBuildOutput>false</IncludeBuildOutput>
-        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+        <NoWarn>$(NoWarn);NU5128</NoWarn>
         <TargetsForTfmSpecificContentInPackage>
             $(TargetsForTfmSpecificContentInPackage);PackLocanGeneratorAssemblies
         </TargetsForTfmSpecificContentInPackage>

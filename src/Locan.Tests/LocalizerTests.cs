@@ -1,7 +1,7 @@
 using System.Globalization;
 using Locan.Containers;
 using Locan.Core.Exceptions;
-using Locan.LocalizableMessages;
+using Locan.Core.LocalizableMessages;
 using Locan.Tests.TestInfrastructure;
 
 namespace Locan.Tests;

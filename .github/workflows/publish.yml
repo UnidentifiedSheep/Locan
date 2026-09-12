@@ -52,7 +52,7 @@ jobs:
           echo "value=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Restore
-        run: dotnet restore Locan.sln
+        run: dotnet restore Locan.sln --disable-parallel
 
       - name: Build and test
         run: >-
@@ -84,6 +84,58 @@ jobs:
               -p:PackageVersion="$PACKAGE_VERSION" \
               -p:ContinuousIntegrationBuild=true
           done
+
+      - name: Verify generator package in a clean project
+        shell: bash
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          smoke_directory="$RUNNER_TEMP/locan-package-smoke"
+          dotnet new classlib --framework net10.0 --output "$smoke_directory"
+          dotnet add "$smoke_directory" package Locan.Generator \
+            --version "$PACKAGE_VERSION" \
+            --no-restore
+
+          cat > "$smoke_directory/localizationSettings.json" <<'JSON'
+          {
+            "defaultCulture": "en",
+            "paths": [
+              {
+                "searchPattern": "localization-*.json",
+                "folderPath": "",
+                "recursive": false
+              }
+            ]
+          }
+          JSON
+
+          cat > "$smoke_directory/localization-en.json" <<'JSON'
+          {
+            "culture": "en",
+            "messages": {
+              "package.smoke.test": "Package {Version|String} works."
+            }
+          }
+          JSON
+
+          cat > "$smoke_directory/Class1.cs" <<'CSHARP'
+          using Locan.Generator.Attributes;
+
+          [assembly: LocalizationModule("Locan.PackageSmoke")]
+
+          namespace Locan.PackageSmoke;
+
+          public static class SmokeTest
+          {
+              public static PackageSmokeTestMessage Create(string version) =>
+                  PackageSmokeTestMessage.Create(version);
+          }
+          CSHARP
+
+          dotnet restore "$smoke_directory" \
+            --source "$GITHUB_WORKSPACE/artifacts/packages" \
+            --source https://api.nuget.org/v3/index.json
+          dotnet build "$smoke_directory" --configuration Release --no-restore
 
       - name: Upload packages
         uses: actions/upload-artifact@v4

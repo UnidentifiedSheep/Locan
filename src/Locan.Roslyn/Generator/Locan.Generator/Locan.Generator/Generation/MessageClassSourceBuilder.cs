@@ -11,7 +11,7 @@ namespace Locan.Generator.Generation;
 
 internal static class MessageClassSourceBuilder
 {
-	private const string BaseClass = "global::Locan.LocalizableMessages.LocalizableMessage";
+	private const string BaseClass = "global::Locan.Core.LocalizableMessages.LocalizableMessage";
 
 	public static string Build(ModuleOptions module, MessageDefinition definition)
 	{

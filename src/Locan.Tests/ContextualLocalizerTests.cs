@@ -1,4 +1,4 @@
-using Locan.LocalizableMessages;
+using Locan.Core.LocalizableMessages;
 using Locan.Tests.TestInfrastructure;
 
 namespace Locan.Tests;

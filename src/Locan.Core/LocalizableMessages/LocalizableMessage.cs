@@ -1,7 +1,8 @@
+using Locan.Core.Compatibility;
 using Locan.Core.Interfaces;
 using Locan.Core.Models;
 
-namespace Locan.LocalizableMessages;
+namespace Locan.Core.LocalizableMessages;
 
 public class LocalizableMessage : ILocalizableMessage
 {
@@ -11,7 +12,7 @@ public class LocalizableMessage : ILocalizableMessage
 
 	public LocalizableMessage(string messageKey)
 	{
-		ArgumentException.ThrowIfNullOrWhiteSpace(messageKey);
+		ArgumentGuard.NotNullOrWhiteSpace(messageKey, nameof(messageKey));
 		MessageKey = messageKey;
 	}
 
@@ -20,7 +21,7 @@ public class LocalizableMessage : ILocalizableMessage
 		object? value,
 		string? format = null)
 	{
-		ArgumentException.ThrowIfNullOrWhiteSpace(key);
+		ArgumentGuard.NotNullOrWhiteSpace(key, nameof(key));
 		ValuesDict[key] = new LocalizableMessageValue(value, format);
 		return this;
 	}

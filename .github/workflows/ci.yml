@@ -26,7 +26,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore Locan.sln
+        run: dotnet restore Locan.sln --disable-parallel
 
       - name: Build
         run: dotnet build Locan.sln --configuration Release --no-restore -p:ContinuousIntegrationBuild=true
