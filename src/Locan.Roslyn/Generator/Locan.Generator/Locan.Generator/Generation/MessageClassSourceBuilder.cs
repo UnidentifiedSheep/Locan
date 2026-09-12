@@ -26,11 +26,16 @@ internal static class MessageClassSourceBuilder
 		writer.WriteLine($"namespace {module.Name}");
 		writer.OpenBlock();
 		WriteClassDocumentation(writer, definition, placeholders);
-		writer.WriteLine(
-			$"{GetAccessibility(module)} partial class {definition.ClassName} : {BaseClass}");
+		writer.WriteLine($"{GetAccessibility(module)} partial class {definition.ClassName} : {BaseClass}");
 		writer.OpenBlock();
 		writer.WriteLine($"public const string Key = {CSharpNames.Literal(definition.Key)};");
 		writer.WriteLine();
+
+		if (placeholders.Count == 0)
+		{
+			writer.WriteLine($"public static readonly {definition.ClassName} Instance = Create();");
+			writer.WriteLine();
+		}
 
 		WriteConstructor(writer, definition, placeholders);
 		writer.WriteLine();
