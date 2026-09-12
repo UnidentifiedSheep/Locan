@@ -1,0 +1,11 @@
+{
+  "culture": "tr",
+  "messages": {
+    "article.not.found": "Ürün bulunamadı.",
+    "articles.not.found": "Ürünler bulunamadı.",
+    "article.stock.changed": "'{Sku}' ürününün stok miktarı {Delta} kadar değişti.",
+    "article.reservation.status.changed": "{ReservationId} rezervasyonunun etkinlik durumu {IsActive} olarak değiştirildi.",
+    "article.price.updated": "'{Sku}' ürününün fiyatı {Price} {Currency} olarak güncellendi.",
+    "article.import.completed": "İçe aktarma {CompletedAt} tarihinde tamamlandı; {Count} ürün işlendi."
+  }
+}

@@ -52,9 +52,10 @@ public sealed class ResolveLocalizationFiles : Task
             var files = config.Paths
                 .SelectMany(options =>
                 {
-                    var directory = Path.IsPathRooted(options.FolderPath)
-                        ? Path.GetFullPath(options.FolderPath)
-                        : Path.GetFullPath(options.FolderPath, configDirectory);
+					var directory = Path.GetFullPath(
+						Path.IsPathRooted(options.FolderPath)
+							? options.FolderPath
+							: Path.Combine(configDirectory, options.FolderPath));
 
                     var searchOption = options.Recursive
                         ? SearchOption.AllDirectories
@@ -72,9 +73,9 @@ public sealed class ResolveLocalizationFiles : Task
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToArray();
 
-            var templateFiles = files
-                .Where(file => IsTemplate(file, config.DefaultCulture))
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+			var templateFiles = new HashSet<string>(
+				files.Where(file => IsTemplate(file, config.DefaultCulture)),
+				StringComparer.OrdinalIgnoreCase);
 
             Files = files
                 .GroupBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase)
@@ -178,7 +179,7 @@ public sealed class ResolveLocalizationFiles : Task
     private static string[] SplitPath(string path)
     {
         var root = Path.GetPathRoot(path);
-        var relative = root is null ? path : path[root.Length..];
+		var relative = root is null ? path : path.Substring(root.Length);
 
         return relative.Split(
             [Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar],

@@ -33,8 +33,20 @@
         <ProjectReference Include="..\..\..\Locan.Build\Locan.Build.csproj"
                           ReferenceOutputAssembly="false"
                           SkipGetTargetFrameworkProperties="true"
-                          AdditionalProperties="TargetFramework=net10.0"
+                          AdditionalProperties="TargetFramework=netstandard2.0"
                           PrivateAssets="all" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="..\..\..\Locan.Compiler\Resources.resx"
+                          Link="Resources.resx"
+                          LogicalName="Locan.Compiler.Resources.resources" />
+        <Compile Include="..\..\..\Locan.Compiler\Resources.Designer.cs"
+                 Link="Resources.Designer.cs" />
+        <AdditionalFiles Include="..\..\..\Locan.Compiler\AnalyzerReleases.Shipped.md"
+                         Link="AnalyzerReleases.Shipped.md" />
+        <AdditionalFiles Include="..\..\..\Locan.Compiler\AnalyzerReleases.Unshipped.md"
+                         Link="AnalyzerReleases.Unshipped.md" />
     </ItemGroup>
 
     <ItemGroup>
@@ -49,10 +61,10 @@
                                     PackagePath="analyzers\dotnet\cs" />
             <TfmSpecificPackageFile Include="$(TargetDir)Locan.Core.dll"
                                     PackagePath="analyzers\dotnet\cs" />
-            <TfmSpecificPackageFile Include="..\..\..\Locan.Build\bin\$(Configuration)\net10.0\Locan.Build.dll"
-                                    PackagePath="tools\net10.0" />
-            <TfmSpecificPackageFile Include="..\..\..\Locan.Build\bin\$(Configuration)\net10.0\Locan.Compiler.dll"
-                                    PackagePath="tools\net10.0" />
+            <TfmSpecificPackageFile Include="..\..\..\Locan.Build\bin\$(Configuration)\netstandard2.0\Locan.Build.dll"
+									PackagePath="tools\netstandard2.0" />
+			<TfmSpecificPackageFile Include="..\..\..\Locan.Build\bin\$(Configuration)\netstandard2.0\Locan.Compiler.dll"
+									PackagePath="tools\netstandard2.0" />
         </ItemGroup>
     </Target>
 

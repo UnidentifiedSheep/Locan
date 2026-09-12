@@ -1,0 +1,11 @@
+{
+  "culture": "ru",
+  "messages": {
+    "article.not.found": "Артикул не найден.",
+    "articles.not.found": "Артикулы не найдены.",
+    "article.stock.changed": "Остаток артикула '{Sku}' изменился на {Delta}.",
+    "article.reservation.status.changed": "Статус активности резервации {ReservationId} изменён на {IsActive}.",
+    "article.price.updated": "Цена артикула '{Sku}' обновлена до {Price} {Currency}.",
+    "article.import.completed": "Импорт завершён {CompletedAt}; обработано артикулов: {Count}."
+  }
+}

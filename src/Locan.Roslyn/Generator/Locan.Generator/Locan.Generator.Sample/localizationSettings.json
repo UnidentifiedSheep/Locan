@@ -1,9 +1,10 @@
 {
-  "defaultCulture": "ru",
-  "paths": [
-    {
-      "searchPattern": "*.json",
-      "folderPath": ""
-    }
-  ]
+	"defaultCulture": "en",
+	"paths": [
+		{
+			"searchPattern": "article-*.json",
+			"folderPath": "",
+			"recursive": false
+		}
+	]
 }

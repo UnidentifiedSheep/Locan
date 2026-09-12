@@ -27,6 +27,34 @@ public sealed class LocalizableMessagesGeneratorTests
 		""";
 
 	[Fact]
+	public void SampleProjectGeneratesMessagesFromLocalizationFiles()
+	{
+		var notFound = new Sample.ArticleNotFoundMessage();
+		var stock = Sample.ArticleStockChangedMessage.Create(
+			"SKU-42",
+			-3);
+		var reservation = Sample.ArticleReservationStatusChangedMessage.Create(
+			42L,
+			true);
+		var price = Sample.ArticlePriceUpdatedMessage.Create(
+			"SKU-42",
+			12.5m,
+			"USD");
+		var completed = Sample.ArticleImportCompletedMessage.Create(
+			new DateTime(2026, 9, 12, 13, 45, 10, DateTimeKind.Utc),
+			1234);
+
+		Assert.Equal("article.not.found", notFound.MessageKey);
+		Assert.Equal("SKU-42", stock.Values["Sku"]);
+		Assert.Equal("-3", stock.Values["Delta"]);
+		Assert.Equal("42", reservation.Values["ReservationId"]);
+		Assert.Equal("True", reservation.Values["IsActive"]);
+		Assert.Equal("12.50", price.Values["Price"]);
+		Assert.Equal("2026-09-12 13:45:10", completed.Values["CompletedAt"]);
+		Assert.Equal("1,234", completed.Values["Count"]);
+	}
+
+	[Fact]
 	public void GeneratesMessagesForAttributedAssembly()
 	{
 		var generator = new LocalizableMessagesGenerator();
@@ -98,9 +126,11 @@ public sealed class LocalizableMessagesGeneratorTests
 			.Split(Path.PathSeparator)
 			.Select(static path => MetadataReference.CreateFromFile(path));
 
-		return frameworkAssemblies
-			.Append(MetadataReference.CreateFromFile(typeof(ILocalizableMessage).Assembly.Location))
-			.Append(MetadataReference.CreateFromFile(typeof(LocalizableMessage).Assembly.Location))
-			.ToArray();
+		return
+		[
+			.. frameworkAssemblies,
+			MetadataReference.CreateFromFile(typeof(ILocalizableMessage).Assembly.Location),
+			MetadataReference.CreateFromFile(typeof(LocalizableMessage).Assembly.Location)
+		];
 	}
 }

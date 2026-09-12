@@ -1,0 +1,11 @@
+{
+  "culture": "en",
+  "messages": {
+    "article.not.found": "Article not found.",
+    "articles.not.found": "Articles not found.",
+    "article.stock.changed": "Stock for article '{Sku|String}' changed by {Delta|Int32}.",
+    "article.reservation.status.changed": "Reservation {ReservationId|Int64} active status changed to {IsActive|Boolean}.",
+    "article.price.updated": "Article '{Sku|String}' price updated to {Price|Decimal|F2} {Currency|String}.",
+    "article.import.completed": "Import completed at {CompletedAt|DateTime|yyyy-MM-dd HH:mm:ss}; processed {Count|Int32|N0} articles."
+  }
+}
