@@ -16,6 +16,8 @@ namespace Locan.Generator;
 [Generator]
 public sealed class LocalizableMessagesGenerator : IIncrementalGenerator
 {
+	private const string DefaultCultureProperty = "build_property.LocanDefaultCulture";
+
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
 		context.RegisterPostInitializationOutput(static postInitializationContext =>
@@ -24,20 +26,30 @@ public sealed class LocalizableMessagesGenerator : IIncrementalGenerator
 				SourceText.From(LocalizationModuleAttributeSource.Source, Encoding.UTF8)));
 
 		var modules = context.SyntaxProvider.ForLocalizationModules();
-		var input = modules.Combine(context.AdditionalTextsProvider.Collect());
+		var defaultCulture = context.AnalyzerConfigOptionsProvider.Select(
+			static (provider, _) =>
+				provider.GlobalOptions.TryGetValue(DefaultCultureProperty, out var value) &&
+				!string.IsNullOrWhiteSpace(value)
+					? value
+					: "en");
+		var input = modules
+			.Combine(context.AdditionalTextsProvider.Collect())
+			.Combine(defaultCulture);
 
 		context.RegisterSourceOutput(
 			input,
 			static (sourceContext, value) => GenerateCode(
 				sourceContext,
-				value.Left,
+				value.Left.Left,
+				value.Left.Right,
 				value.Right));
 	}
 
 	private static void GenerateCode(
 		SourceProductionContext context,
 		ModuleOptions module,
-		ImmutableArray<AdditionalText> files)
+		ImmutableArray<AdditionalText> files,
+		string defaultCulture)
 	{
 		if (!CSharpNames.IsValidNamespace(module.Name))
 		{
@@ -66,7 +78,13 @@ public sealed class LocalizableMessagesGenerator : IIncrementalGenerator
 				continue;
 			}
 
-			foreach (var message in resource!.Messages
+			if (!resource!.IsTemplate && !string.Equals(
+					resource.Culture,
+					defaultCulture,
+					StringComparison.OrdinalIgnoreCase))
+				continue;
+
+			foreach (var message in resource.Messages
 				         .OrderBy(static pair => pair.Key, StringComparer.Ordinal))
 				catalog.Add(message.Key, message.Value);
 		}

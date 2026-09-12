@@ -1,37 +1,48 @@
 # Configuration and resources
 
-Create `localizationSettings.json` in the project directory to select localization files:
+Locan discovers resources through declarative MSBuild items. Because these items exist during project evaluation, the CLI, Rider, and Visual Studio see the same source-generator inputs.
 
-```json
-{
-  "defaultCulture": "en",
-  "paths": [
-    {
-      "folderPath": "Localization",
-      "searchPattern": "*.locan.json",
-      "recursive": true,
-      "generateMessages": true,
-      "copyToOutput": true
-    }
-  ]
-}
+## Build-time configuration
+
+Add the default culture and resource glob to the project file:
+
+```xml
+<PropertyGroup>
+  <LocanDefaultCulture>en</LocanDefaultCulture>
+</PropertyGroup>
+
+<ItemGroup>
+  <LocanResource Include="Localization/**/*.json"
+                 GenerateMessages="true"
+                 CopyToOutput="true" />
+</ItemGroup>
 ```
 
-- `folderPath` is relative to the settings file.
-- `searchPattern` defaults to `*.json`.
-- `recursive` defaults to `true`.
-- `generateMessages` controls whether matching canonical resources participate in source generation. It defaults to `true`.
-- `copyToOutput` controls whether matching resources are copied for runtime loading. It defaults to `true`.
-- `defaultCulture` selects the resources used to generate the C# API.
+`LocanDefaultCulture` defaults to `en`. The generator reads all resources with `GenerateMessages="true"` and uses resources whose `culture` matches this property, plus resources marked with `"isTemplate": true`.
 
-The two operations are independent:
+Each `LocanResource` supports two independent options, both defaulting to `true`:
 
-| `generateMessages` | `copyToOutput` | Result |
+| `GenerateMessages` | `CopyToOutput` | Result |
 | --- | --- | --- |
-| `true` | `true` | Generate messages and copy resources |
-| `true` | `false` | Generate messages only |
-| `false` | `true` | Copy resources only |
-| `false` | `false` | Ignore the path |
+| `true` | `true` | Use for generation and copy for runtime |
+| `true` | `false` | Use for generation only |
+| `false` | `true` | Copy for runtime only |
+| `false` | `false` | Keep only as a project item |
+
+Separate globs can be used when source templates and deployed translations live in different directories:
+
+```xml
+<ItemGroup>
+  <LocanResource Include="Localization/Templates/**/*.json"
+                 GenerateMessages="true"
+                 CopyToOutput="false" />
+  <LocanResource Include="Localization/Translations/**/*.json"
+                 GenerateMessages="false"
+                 CopyToOutput="true" />
+</ItemGroup>
+```
+
+## Resource format
 
 Each resource contains a culture and a message dictionary:
 
@@ -45,7 +56,7 @@ Each resource contains a culture and a message dictionary:
 }
 ```
 
-Additional locales use the same keys:
+Translations use the same keys and placeholder names:
 
 ```json
 {
@@ -57,8 +68,6 @@ Additional locales use the same keys:
 }
 ```
 
-Resources selected for copying are placed in the application's `Locan` output directory and loaded during startup. Files with the same culture are merged; the same key appearing in multiple files for one culture fails initialization.
+Resources selected for copying are placed under `Locan/` in build and publish output, preserving the recursive part of the glob. They are loaded during application startup. The same key appearing in multiple files for one culture fails initialization.
 
-Set `"isTemplate": true` on a resource only when it should also participate in source generation despite not matching `defaultCulture`.
-
-At runtime, culture lookup follows `CultureInfo.Parent`, for example `ru-RU → ru`. It does not automatically fall back to the `defaultCulture` from this file.
+At runtime, culture lookup follows `CultureInfo.Parent`, for example `ru-RU → ru`. It does not automatically fall back to `LocanDefaultCulture`.

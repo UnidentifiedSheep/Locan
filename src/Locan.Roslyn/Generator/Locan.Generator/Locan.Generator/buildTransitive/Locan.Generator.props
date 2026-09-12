@@ -1,0 +1,12 @@
+<Project>
+    <PropertyGroup>
+        <LocanDefaultCulture Condition="'$(LocanDefaultCulture)' == ''">en</LocanDefaultCulture>
+    </PropertyGroup>
+
+    <ItemDefinitionGroup>
+        <LocanResource>
+            <GenerateMessages>true</GenerateMessages>
+            <CopyToOutput>true</CopyToOutput>
+        </LocanResource>
+    </ItemDefinitionGroup>
+</Project>

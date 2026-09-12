@@ -33,11 +33,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\..\Locan.Core\Locan.Core.csproj" />
-        <ProjectReference Include="..\..\..\Locan.Build\Locan.Build.csproj"
-                          ReferenceOutputAssembly="false"
-                          SkipGetTargetFrameworkProperties="true"
-                          AdditionalProperties="TargetFramework=netstandard2.0"
-                          PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>
@@ -53,7 +48,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="..\..\..\Locan.Build\buildTransitive\Locan.Build.targets"
+        <None Include="buildTransitive\Locan.Generator.props"
+              Pack="true"
+              PackagePath="buildTransitive\Locan.Generator.props" />
+        <None Include="buildTransitive\Locan.Generator.targets"
               Pack="true"
               PackagePath="buildTransitive\Locan.Generator.targets" />
     </ItemGroup>
@@ -64,10 +62,6 @@
                                     PackagePath="analyzers\dotnet\cs" />
             <TfmSpecificPackageFile Include="$(TargetDir)Locan.Core.dll"
                                     PackagePath="analyzers\dotnet\cs" />
-            <TfmSpecificPackageFile Include="..\..\..\Locan.Build\bin\$(Configuration)\netstandard2.0\Locan.Build.dll"
-									PackagePath="tools\netstandard2.0" />
-			<TfmSpecificPackageFile Include="..\..\..\Locan.Build\bin\$(Configuration)\netstandard2.0\Locan.Compiler.dll"
-									PackagePath="tools\netstandard2.0" />
         </ItemGroup>
     </Target>
 

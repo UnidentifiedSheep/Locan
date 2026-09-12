@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Collections.Generic;
 using System;
 using System.IO;
 using System.Linq;
@@ -15,7 +16,6 @@ public sealed class LocalizableMessagesGeneratorTests
 	private const string LocalizationJson = """
 		{
 		  "culture": "en",
-		  "isTemplate": true,
 		  "messages": {
 		    "user.created": "User {Name|String} was created",
 		    "invoice.paid": "Invoice {Number|int} was paid at {Date|dateTIME|yyyy-MM-dd} by {Source|UnknownType}",
@@ -131,6 +131,92 @@ public sealed class LocalizableMessagesGeneratorTests
 		Assert.Contains("WithNameMessagePlaceholder(string value)", conflictingNameSource);
 		Assert.Contains("WithNameMessagePlaceholder2(string value)", conflictingNameSource);
 	}
+
+	[Fact]
+	public void GeneratesMessagesOnlyForConfiguredDefaultCulture()
+	{
+		var driver = CreateDriver(
+			"ru",
+			new TestAdditionalFile(
+				"./messages.en.json",
+				CreateResource("en", "english")),
+			new TestAdditionalFile(
+				"./messages.ru.json",
+				CreateResource("ru", "russian")));
+
+		var result = RunGenerator(driver);
+		var generatedFiles = result.SyntaxTrees
+			.Skip(1)
+			.Select(static tree => Path.GetFileName(tree.FilePath))
+			.ToArray();
+
+		Assert.Contains("RussianMessage.g.cs", generatedFiles);
+		Assert.DoesNotContain("EnglishMessage.g.cs", generatedFiles);
+	}
+
+	[Fact]
+	public void GeneratesMessagesForExplicitTemplateOutsideDefaultCulture()
+	{
+		var driver = CreateDriver(
+			"en",
+			new TestAdditionalFile(
+				"./messages.ru.json",
+				CreateResource("ru", "shared", isTemplate: true)));
+
+		var result = RunGenerator(driver);
+
+		Assert.Contains(
+			result.SyntaxTrees,
+			static tree => Path.GetFileName(tree.FilePath) == "SharedMessage.g.cs");
+	}
+
+	private static GeneratorDriver CreateDriver(
+		string defaultCulture,
+		params AdditionalText[] files)
+	{
+		var options = new TestAnalyzerConfigOptionsProvider(
+			new Dictionary<string, string>
+			{
+				["build_property.LocanDefaultCulture"] = defaultCulture
+			});
+
+		return CSharpGeneratorDriver.Create(
+			[new LocalizableMessagesGenerator().AsSourceGenerator()],
+			files,
+			optionsProvider: options);
+	}
+
+	private static Compilation RunGenerator(GeneratorDriver driver)
+	{
+		var source = """
+			[assembly: Locan.Generator.Attributes.LocalizationModule("Sample.Messages")]
+			""";
+		var compilation = CSharpCompilation.Create(
+			"GeneratorTest",
+			[CSharpSyntaxTree.ParseText(source)],
+			GetMetadataReferences(),
+			new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+		driver.RunGeneratorsAndUpdateCompilation(
+			compilation,
+			out var newCompilation,
+			out var diagnostics);
+		Assert.Empty(diagnostics);
+		return newCompilation;
+	}
+
+	private static string CreateResource(
+		string culture,
+		string key,
+		bool isTemplate = false) => $$"""
+		{
+		  "culture": "{{culture}}",
+		  "isTemplate": {{isTemplate.ToString().ToLowerInvariant()}},
+		  "messages": {
+		    "{{key}}": "Message"
+		  }
+		}
+		""";
 
 	private static MetadataReference[] GetMetadataReferences()
 	{

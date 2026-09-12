@@ -1,5 +1,7 @@
 # Locan
 
+[![NuGet](https://img.shields.io/nuget/v/Locan.AspNetCore?label=NuGet)](https://www.nuget.org/packages/Locan.AspNetCore)
+
 Locan is a strongly typed localization library for .NET. It keeps translations in JSON, generates message classes at compile time, and renders them using the current UI culture.
 
 ## Why Locan
@@ -21,19 +23,18 @@ dotnet add package Locan.Generator
 
 ## Two-minute example
 
-Add `localizationSettings.json` to the project directory:
+Declare the default culture and localization resources in the project file:
 
-```json
-{
-  "defaultCulture": "en",
-  "paths": [
-    {
-      "searchPattern": "localization-*.json",
-      "folderPath": "Localization",
-      "recursive": false
-    }
-  ]
-}
+```xml
+<PropertyGroup>
+  <LocanDefaultCulture>en</LocanDefaultCulture>
+</PropertyGroup>
+
+<ItemGroup>
+  <LocanResource Include="Localization/**/*.json"
+                 GenerateMessages="true"
+                 CopyToOutput="true" />
+</ItemGroup>
 ```
 
 Declare the namespace for generated message classes:
@@ -105,7 +106,7 @@ app.MapGet("/price", (IContextualLocalizer localizer) =>
 app.Run();
 ```
 
-For the English request culture, the result is `Price updated to 12.50.`. Resource files matched by the settings file are copied to the application's `Locan` output directory automatically.
+For the English request culture, the result is `Price updated to 12.50.`. Resources with `CopyToOutput="true"` are copied to the application's `Locan` output directory automatically.
 
 ## Packages
 

@@ -26,6 +26,9 @@ internal static class LocalizationResourceParser
 			if (resource is null)
 				throw new InvalidOperationException("the file is empty");
 
+			if (string.IsNullOrWhiteSpace(resource.Culture))
+				throw new InvalidOperationException("property 'culture' is required");
+
 			if (resource.Messages is null)
 				throw new InvalidOperationException("property 'messages' is required");
 
