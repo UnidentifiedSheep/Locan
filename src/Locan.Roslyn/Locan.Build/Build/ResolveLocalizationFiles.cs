@@ -49,48 +49,24 @@ public sealed class ResolveLocalizationFiles : Task
 
             var fullConfigPath = Path.GetFullPath(ConfigPath);
 
-            var files = config.Paths
-                .SelectMany(options =>
-                {
-					var directory = Path.GetFullPath(
-						Path.IsPathRooted(options.FolderPath)
-							? options.FolderPath
-							: Path.Combine(configDirectory, options.FolderPath));
+            var resolvedFiles = ResolveFiles(
+                config.Paths,
+                configDirectory,
+                fullConfigPath);
+            var selectedFiles = resolvedFiles.Values
+                .Where(static file => file.GenerateMessages || file.CopyToOutput)
+                .OrderBy(static file => file.Path, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+            var items = GenerateItems(selectedFiles.Select(static file => file.Path));
 
-                    var searchOption = options.Recursive
-                        ? SearchOption.AllDirectories
-                        : SearchOption.TopDirectoryOnly;
-
-                    return Directory.EnumerateFiles(
-                        directory,
-                        options.SearchPattern,
-                        searchOption);
-                })
-                .Where(file => !string.Equals(
-                    Path.GetFullPath(file),
-                    fullConfigPath,
-                    StringComparison.OrdinalIgnoreCase))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
+            Files = selectedFiles
+                .Where(static file => file.CopyToOutput)
+                .Select(file => items[file.Path])
                 .ToArray();
 
-			var templateFiles = new HashSet<string>(
-				files.Where(file => IsTemplate(file, config.DefaultCulture)),
-				StringComparer.OrdinalIgnoreCase);
-
-            Files = files
-                .GroupBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase)
-                .SelectMany(group =>
-                {
-                    var groupedFiles = group.ToArray();
-
-                    return groupedFiles.Length == 1
-						? [GenItem(groupedFiles[0], null)]
-						: GenerateUniqueItems(groupedFiles);
-                })
-                .ToArray();
-
-            TemplateFiles = Files
-                .Where(file => templateFiles.Contains(file.ItemSpec))
+            TemplateFiles = selectedFiles
+                .Where(file => file.GenerateMessages && IsTemplate(file.Path, config.DefaultCulture))
+                .Select(file => items[file.Path])
                 .ToArray();
 
             return true;
@@ -100,6 +76,78 @@ public sealed class ResolveLocalizationFiles : Task
             Log.LogErrorFromException(exception);
             return false;
         }
+    }
+
+    private static Dictionary<string, ResolvedFile> ResolveFiles(
+        IEnumerable<LocalizationGenerationPathOptions> paths,
+        string configDirectory,
+        string fullConfigPath)
+    {
+        var result = new Dictionary<string, ResolvedFile>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var options in paths)
+        {
+            if (!options.GenerateMessages && !options.CopyToOutput)
+                continue;
+
+            var directory = Path.GetFullPath(
+                Path.IsPathRooted(options.FolderPath)
+                    ? options.FolderPath
+                    : Path.Combine(configDirectory, options.FolderPath));
+            var searchOption = options.Recursive
+                ? SearchOption.AllDirectories
+                : SearchOption.TopDirectoryOnly;
+
+            foreach (var path in Directory.EnumerateFiles(
+                         directory,
+                         options.SearchPattern,
+                         searchOption))
+            {
+                var fullPath = Path.GetFullPath(path);
+
+                if (string.Equals(
+                        fullPath,
+                        fullConfigPath,
+                        StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (result.TryGetValue(fullPath, out var existing))
+                {
+                    result[fullPath] = existing with
+                    {
+                        GenerateMessages = existing.GenerateMessages || options.GenerateMessages,
+                        CopyToOutput = existing.CopyToOutput || options.CopyToOutput
+                    };
+                    continue;
+                }
+
+                result.Add(
+                    fullPath,
+                    new ResolvedFile(
+                        fullPath,
+                        options.GenerateMessages,
+                        options.CopyToOutput));
+            }
+        }
+
+        return result;
+    }
+
+    private static Dictionary<string, ITaskItem> GenerateItems(IEnumerable<string> files)
+    {
+        return files
+            .GroupBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase)
+            .SelectMany(group =>
+            {
+                var groupedFiles = group.ToArray();
+
+                return groupedFiles.Length == 1
+                    ? [GenItem(groupedFiles[0], null)]
+                    : GenerateUniqueItems(groupedFiles);
+            })
+            .ToDictionary(
+                static item => item.ItemSpec,
+                StringComparer.OrdinalIgnoreCase);
     }
 
     private static bool IsTemplate(
@@ -207,4 +255,9 @@ public sealed class ResolveLocalizationFiles : Task
 
         return item;
     }
+
+    private sealed record ResolvedFile(
+        string Path,
+        bool GenerateMessages,
+        bool CopyToOutput);
 }

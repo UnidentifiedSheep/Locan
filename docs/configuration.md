@@ -9,7 +9,9 @@ Create `localizationSettings.json` in the project directory to select localizati
     {
       "folderPath": "Localization",
       "searchPattern": "*.locan.json",
-      "recursive": true
+      "recursive": true,
+      "generateMessages": true,
+      "copyToOutput": true
     }
   ]
 }
@@ -18,7 +20,18 @@ Create `localizationSettings.json` in the project directory to select localizati
 - `folderPath` is relative to the settings file.
 - `searchPattern` defaults to `*.json`.
 - `recursive` defaults to `true`.
+- `generateMessages` controls whether matching canonical resources participate in source generation. It defaults to `true`.
+- `copyToOutput` controls whether matching resources are copied for runtime loading. It defaults to `true`.
 - `defaultCulture` selects the resources used to generate the C# API.
+
+The two operations are independent:
+
+| `generateMessages` | `copyToOutput` | Result |
+| --- | --- | --- |
+| `true` | `true` | Generate messages and copy resources |
+| `true` | `false` | Generate messages only |
+| `false` | `true` | Copy resources only |
+| `false` | `false` | Ignore the path |
 
 Each resource contains a culture and a message dictionary:
 
@@ -44,7 +57,7 @@ Additional locales use the same keys:
 }
 ```
 
-Discovered files are copied to the application's `Locan` output directory and loaded during startup. Files with the same culture are merged; duplicate keys within one culture fail initialization.
+Resources selected for copying are placed in the application's `Locan` output directory and loaded during startup. Files with the same culture are merged; the same key appearing in multiple files for one culture fails initialization.
 
 Set `"isTemplate": true` on a resource only when it should also participate in source generation despite not matching `defaultCulture`.
 

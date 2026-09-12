@@ -2,9 +2,11 @@
 	"defaultCulture": "en",
 	"paths": [
 		{
-			"searchPattern": "article-*.json",
-			"folderPath": "",
-			"recursive": false
-		}
+          "searchPattern": "article-*.json",
+          "folderPath": "",
+          "recursive": false,
+          "generateMessages": true,
+          "copyToOutput": true
+        }
 	]
 }

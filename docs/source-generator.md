@@ -46,7 +46,7 @@ The factory parameters and `With...` methods use the types and formats declared 
 
 ## Multiple locales
 
-Resources matching `defaultCulture`, plus resources marked with `isTemplate: true`, participate in generation. Other locales are copied for runtime use but are not checked by the generator.
+Within paths where `generateMessages` is enabled, resources matching `defaultCulture`, plus resources marked with `isTemplate: true`, participate in generation. Other locales are not checked by the generator; `copyToOutput` independently controls whether any matched resource is copied for runtime use.
 
 Canonical files may contribute different keys. If the same key occurs more than once, its placeholder names, types, nullability, and formats must match. Missing keys in ordinary translation files are not currently reported at compile time.
 

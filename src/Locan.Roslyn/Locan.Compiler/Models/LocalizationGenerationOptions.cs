@@ -21,4 +21,10 @@ public record LocalizationGenerationPathOptions
 
 	[JsonPropertyName("recursive")]
 	public bool Recursive { get; init; } = true;
+
+	[JsonPropertyName("generateMessages")]
+	public bool GenerateMessages { get; init; } = true;
+
+	[JsonPropertyName("copyToOutput")]
+	public bool CopyToOutput { get; init; } = true;
 }
