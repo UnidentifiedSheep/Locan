@@ -42,6 +42,34 @@ Separate globs can be used when source templates and deployed translations live 
 </ItemGroup>
 ```
 
+## IDE resource layout
+
+By default, Locan resources appear in Rider and Visual Studio under a virtual `Locan` folder. The recursive part of each resource glob is preserved:
+
+```xml
+<LocanResource Include="../Main.Entities/Localization/**/*.json"
+               GenerateMessages="false"
+               CopyToOutput="true" />
+```
+
+For example, `../Main.Entities/Localization/Errors/validation.json` is displayed as `Locan/Errors/validation.json`. This only changes the IDE presentation: the source file stays in its original location, and build and publish output paths are still controlled independently by Locan.
+
+Set `Link` explicitly to choose another virtual path. Locan does not overwrite a user-defined value:
+
+```xml
+<LocanResource Include="../Main.Entities/Localization/**/*.json">
+  <Link>SharedResources/%(RecursiveDir)%(Filename)%(Extension)</Link>
+</LocanResource>
+```
+
+Automatic links can be disabled for the whole project:
+
+```xml
+<PropertyGroup>
+  <LocanUseDefaultResourceLink>false</LocanUseDefaultResourceLink>
+</PropertyGroup>
+```
+
 ## Resource format
 
 Each resource contains a culture and a message dictionary:

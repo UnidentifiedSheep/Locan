@@ -1,6 +1,7 @@
 <Project>
     <PropertyGroup>
         <LocanDefaultCulture Condition="'$(LocanDefaultCulture)' == ''">en</LocanDefaultCulture>
+        <LocanUseDefaultResourceLink Condition="'$(LocanUseDefaultResourceLink)' == ''">true</LocanUseDefaultResourceLink>
     </PropertyGroup>
 
     <ItemDefinitionGroup>

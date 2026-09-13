@@ -120,7 +120,7 @@ jobs:
           JSON
 
           cat > "$smoke_directory/Class1.cs" <<'CSHARP'
-          using Locan.Generator.Attributes;
+          using Locan.Core.Attributes;
 
           [assembly: LocalizationModule("Locan.PackageSmoke")]
 

@@ -69,7 +69,7 @@ public sealed class LocalizableMessagesGeneratorTests
 				new TestAdditionalFile("./localization.en.json", LocalizationJson)));
 
 		var source = """
-			[assembly: Locan.Generator.Attributes.LocalizationModule("Sample.Messages")]
+			[assembly: Locan.Core.Attributes.LocalizationModule("Sample.Messages")]
 			""";
 		var compilation = CSharpCompilation.Create(
 			nameof(LocalizableMessagesGeneratorTests),
@@ -86,7 +86,6 @@ public sealed class LocalizableMessagesGeneratorTests
 		Assert.Equivalent(
 			new[]
 			{
-				"LocalizationModuleAttribute.g.cs",
 				"UserCreatedMessage.g.cs",
 				"InvoicePaidMessage.g.cs",
 				"NullableValuesMessage.g.cs",
@@ -189,7 +188,7 @@ public sealed class LocalizableMessagesGeneratorTests
 	private static Compilation RunGenerator(GeneratorDriver driver)
 	{
 		var source = """
-			[assembly: Locan.Generator.Attributes.LocalizationModule("Sample.Messages")]
+			[assembly: Locan.Core.Attributes.LocalizationModule("Sample.Messages")]
 			""";
 		var compilation = CSharpCompilation.Create(
 			"GeneratorTest",

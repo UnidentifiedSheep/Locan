@@ -40,7 +40,7 @@ Declare the default culture and localization resources in the project file:
 Declare the namespace for generated message classes:
 
 ```csharp
-using Locan.Generator.Attributes;
+using Locan.Core.Attributes;
 
 [assembly: LocalizationModule("MyApplication.Messages")]
 ```

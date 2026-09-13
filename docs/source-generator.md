@@ -3,7 +3,7 @@
 The generator turns localization keys into strongly typed message classes. Add the assembly attribute to select their namespace:
 
 ```csharp
-using Locan.Generator.Attributes;
+using Locan.Core.Attributes;
 
 [assembly: LocalizationModule("MyApplication.Messages")]
 ```

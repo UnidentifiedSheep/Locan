@@ -7,7 +7,6 @@ using Locan.Generator.Extensions;
 using Locan.Generator.Generation;
 using Locan.Generator.Models;
 using Locan.Generator.Parsing;
-using Locan.Generator.Sources;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
@@ -20,11 +19,6 @@ public sealed class LocalizableMessagesGenerator : IIncrementalGenerator
 
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
-		context.RegisterPostInitializationOutput(static postInitializationContext =>
-			postInitializationContext.AddSource(
-				LocalizationModuleAttributeSource.HintName,
-				SourceText.From(LocalizationModuleAttributeSource.Source, Encoding.UTF8)));
-
 		var modules = context.SyntaxProvider.ForLocalizationModules();
 		var defaultCulture = context.AnalyzerConfigOptionsProvider.Select(
 			static (provider, _) =>

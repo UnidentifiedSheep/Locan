@@ -1,5 +1,10 @@
 <Project>
     <ItemGroup>
+        <LocanResource Update="@(LocanResource->WithMetadataValue('Link', ''))"
+                       Condition="'$(LocanUseDefaultResourceLink)' == 'true'">
+            <Link>Locan/%(RecursiveDir)%(Filename)%(Extension)</Link>
+        </LocanResource>
+
         <None Remove="@(LocanResource)" />
         <AdditionalFiles Remove="@(LocanResource)" />
         <Content Remove="@(LocanResource)" />
